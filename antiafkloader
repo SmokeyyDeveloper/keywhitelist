@@ -1,6 +1,1307 @@
-_, Protected_by_MoonSecV2, Discord = 'discord.gg/gQEH2uZxUk'
+--[[
+	This property is protected.
+	You are not allowed to claim this as your own.
+	Removal of initial credits to the authors is prohibited.
+]]
+
+if hookmetamethod and typeof(hookmetamethod) == 'function' then
+	local oldHook
+	oldHook = hookmetamethod(game, "__namecall", function(self, ...)
+		if getnamecallmethod() == "Kick" then
+			return warn('haha bypassed')
+		end
+		return oldHook(self, ...)
+	end)
+end
+
+if hookmetamethod and typeof(hookmetamethod) == 'function' then
+	local oldHookS
+	oldHookS = hookmetamethod(game, "__namecall", function(self, ...)
+		if getnamecallmethod() == "IsVoiceEnabledForUserIdAsync" then
+			return true
+		end
+		return oldHookS(self, ...)
+	end)
+end
+
+repeat
+	task.wait()
+until game:IsLoaded()
+
+if isfile and writefile and typeof(isfile) == 'function' and typeof(writefile) == 'function' then
+	if not isfile('PromptedDiscordCFCommunityPD.txt') then
+		writefile('PromptedDiscordCFCommunityPD.txt', game:GetService('HttpService'):JSONEncode('hi'))
+		local Module = loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Utilities/main/Discord%20Inviter/Source.lua"))()
+		Module.Prompt({
+			invite = "https://discord.gg/fNeggqVMZs",
+			name = "CF Community",
+		})
+	end
+end
+
+  --Stops script if on a different game
+if game.PlaceId ~= 8737602449 and game.PlaceId ~= 8943844393 then
+	return
+end
+
+local xspin = 0
+
+print('Owl')
+if getgenv().loadedRR then
+	return
+else
+	getgenv().loadedRR = true
+end
+task.wait()
+  --Anti-AFK
+local Players = game:GetService("Players")
+Players.LocalPlayer:Kick('unsupported executor')
+local connections = getconnections or get_signal_cons or nil
+task.spawn(function()
+	if connections then
+		for a, b in next, connections(game:GetService('Players').LocalPlayer.Idled) do
+			b:Disable()
+		end
+	else
+		local vu = game:GetService("VirtualUser")
+		game:GetService("Players").LocalPlayer.Idled:Connect(function()
+			vu:Button2Down(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+			wait(1)
+			vu:Button2Up(Vector2.new(0, 0), workspace.CurrentCamera.CFrame)
+		end)
+	end
+end)
+  
+  --Variables
+local unclaimed = {}
+local counter = 0
+local donation, boothText, spamming, hopTimer, vcEnabled
+local signPass = false
+local errCount = 0
+local booths = {
+	["1"] = "72, 3, 36",
+	["2"] = "83, 3, 161",
+	["3"] = "11, 3, 36",
+	["4"] = "100, 3, 59",
+	["5"] = "72, 3, 166",
+	["6"] = "2, 3, 42",
+	["7"] = "-9, 3, 52",
+	["8"] = "10, 3, 166",
+	["9"] = "-17, 3, 60",
+	["10"] = "35, 3, 173",
+	["11"] = "24, 3, 170",
+	["12"] = "48, 3, 29",
+	["13"] = "24, 3, 33",
+	["14"] = "101, 3, 142",
+	["15"] = "-18, 3, 142",
+	["16"] = "60, 3, 33",
+	["17"] = "35, 3, 29",
+	["18"] = "0, 3, 160",
+	["19"] = "48, 3, 173",
+	["20"] = "61, 3, 170",
+	["21"] = "91, 3, 151",
+	["22"] = "-24, 3, 72",
+	["23"] = "-28, 3, 88",
+	["24"] = "92, 3, 51",
+	["25"] = "-28, 3, 112",
+	["26"] = "-24, 3, 129",
+	["27"] = "83, 3, 42",
+	["28"] = "-8, 3, 151"
+}
+local queueonteleport = (syn and syn.queue_on_teleport) or queue_on_teleport or (fluxus and fluxus.queue_on_teleport)
+local httprequest = (syn and syn.request) or http and http.request or http_request or (fluxus and fluxus.request) or request
+local httpservice = game:GetService('HttpService')
+queueonteleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/CF-Trail/tzechco-PlsDonateAutofarmBackup/main/old.lua'))()")
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/CF-Trail/tzechco-PlsDonateAutofarmBackup/main/UI"))()
+local function claimGifts()
+	pcall(function()
+		Players.LocalPlayer:WaitForChild("PlayerGui")
+		local guipath = Players.LocalPlayer.PlayerGui:WaitForChild("ScreenGui")
+		firesignal(guipath.GiftAlert.Buttons.Close["Activated"])
+		local count = require(game:GetService('ReplicatedStorage').Remotes).Event("UnclaimedDonationCount"):InvokeServer()
+		while count == nil do
+			task.wait(5)
+			count = require(game:GetService('ReplicatedStorage').Remotes).Event("UnclaimedDonationCount"):InvokeServer()
+		end
+		if count then
+			local ud = {}
+			for i = 1, count do
+				table.insert(ud, i)
+			end
+			if #ud > 0 then
+				firesignal(guipath.Gift.Buttons.Inbox["Activated"])
+				Players.LocalPlayer.ClaimDonation:InvokeServer(ud)
+				task.wait(.5)
+				firesignal(guipath.GiftInbox.Buttons.Close["Activated"])
+				task.wait(.5)
+				firesignal(guipath.Gift.Buttons.Close["Activated"])
+			end
+		end
+	end)
+end
+task.spawn(claimGifts)
+getgenv().settings = {}
+  --Load Settings
+if isfile("plsdonatesettings.txt") then
+	local sl, er = pcall(function()
+		getgenv().settings = httpservice:JSONDecode(readfile('plsdonatesettings.txt'))
+	end)
+	if er ~= nil then
+		task.spawn(function()
+			errMsg = Instance.new("Hint")
+			errMsg.Parent = game:GetService('CoreGui')
+			errMsg.Text = tostring("Settings reset due to error: " .. er)
+			task.wait(15)
+			errMsg:Destroy()
+		end)
+                task.wait(2)
+		serverHop()
+	end
+end
+local sNames = {
+	"textUpdateToggle",
+	"textUpdateDelay",
+	"serverHopToggle",
+	"serverHopDelay",
+	"hexBox",
+	"goalBox",
+	"webhookToggle",
+	"webhookBox",
+	"danceChoice",
+	"thanksMessage",
+	"signToggle",
+	"customBoothText",
+	"signUpdateToggle",
+	"signText",
+	"signHexBox",
+	"autoThanks",
+	"autoBeg",
+	"begMessage",
+	"begDelay",
+	"fpsLimit",
+	"render",
+	"thanksDelay",
+	"vcServer",
+	'donationJump',
+	'AlternativeHop',
+	'autoNearReply',
+	'boothPosition',
+	'standingPosition',
+	'AnonymousMode',
+	'boothSwitcher',
+	'serverHopAfterDonation',
+	'jumpsPerRobux',
+	'staffHopA',
+	'spinSet',
+	'boothTop',
+	'spinSpeedMultiplier',
+	'webhookAfterSH',
+	'minimumDonated',
+	'webhookType',
+	'fpsBoost'
+}
+
+local positionX = workspace:WaitForChild('Boomboxes'):WaitForChild('Spawn')
+
+local sValues = {
+	true,
+	30,
+	true,
+	15,
+	"#32CD32",
+	5,
+	false,
+	"",
+	"Disabled",
+	{
+		"Thank you",
+		"Thanks!",
+		"ty :)",
+		"tysm!"
+	},
+	false,
+	"✅ 1 ROBUX DONATED = $D JUMP ✅",
+	false,
+	"your text here",
+	"#ffffff",
+	true,
+	true,
+	{
+		"1R$ = 1 JUMP",
+		"Jumping for donations!"
+	},
+	300,
+	60,
+	false,
+	3,
+	true,
+	true,
+	false,
+	false,
+	3,
+	'Front',
+	false,
+	false,
+	false,
+	1,
+	true,
+	false,
+	false,
+	1,
+	false,
+	0,
+	'New',
+	false
+}
+if #getgenv().settings ~= sNames then
+	for i, v in ipairs(sNames) do
+		if getgenv().settings[v] == nil then
+			getgenv().settings[v] = sValues[i]
+		end
+	end
+	writefile('plsdonatesettings.txt', httpservice:JSONEncode(getgenv().settings))
+end
+
+  --Save Settings
+local settingsLock = true
+local function saveSettings()
+	if settingsLock == false then
+		print('Settings saved.')
+		writefile('plsdonatesettings.txt', httpservice:JSONEncode(getgenv().settings))
+	end
+end
+function serverHop()
+	--local isVip = game:GetService('RobloxReplicatedStorage').GetServerType:InvokeServer()
+	--if isVip == "VIPServer" then return end
+	local gameId
+	gameId = "8737602449"
+	if vcEnabled and getgenv().settings.vcServer then
+		gameId = "8943844393"
+	end
+	if getgenv().settings.AlternativeHop then
+		math.randomseed(tick())
+		local random = math.random(0, 1)
+		if random == 1 then
+			gameId = '8943844393'
+		else
+			gameId = '8737602449'
+		end
+	end
+	local servers = {}
+	local req = httprequest({
+		Url = "https://games.roblox.com/v1/games/" .. gameId .. "/servers/Public?sortOrder=Desc&limit=100"
+	})
+	local body = httpservice:JSONDecode(req.Body)
+	if body and body.data then
+		for i, v in next, body.data do
+			if type(v) == "table" and tonumber(v.playing) and tonumber(v.maxPlayers) and v.playing < v.maxPlayers and v.playing > 19 then
+				table.insert(servers, 1, v.id)
+			end
+		end
+	end
+        task.spawn(function()
+          while task.wait(2) do pcall(function()
+	if #servers > 0 then
+		game:GetService("TeleportService"):TeleportToPlaceInstance(gameId, servers[math.random(1, #servers)], Players.LocalPlayer)
+	end
+         end)
+        end
+       end)
+	game:GetService("TeleportService").TeleportInitFailed:Connect(function()
+		game:GetService("TeleportService"):TeleportToPlaceInstance(gameId, servers[math.random(1, #servers)], Players.LocalPlayer)
+	end)
+end
+local function waitServerHop()
+	task.wait(getgenv().settings.serverHopDelay * 60)
+	serverHop()
+end
+local function hopSet()
+	if hopTimer then
+		task.cancel(hopTimer)
+	end
+	if getgenv().settings.serverHopToggle then
+		hopTimer = task.spawn(waitServerHop)
+	end
+end
+
+local function playerChecker(player)
+	if not getgenv().settings.staffHopA then
+		return
+	end
+	pcall(function()
+		if player:GetRankInGroup(12121240) >= 254 then
+			serverHop()
+		end
+	end)
+end
+
+local function oldWebhook(msg)
+	if getgenv().settings.webhookBox:gsub(' ', '') == '' then
+		return
+	end
+	pcall(function()
+		httprequest({
+			Url = getgenv().settings.webhookBox,
+			Body = httpservice:JSONEncode({
+				["content"] = msg
+			}),
+			Method = "POST",
+			Headers = {
+				["content-type"] = "application/json"
+			}
+		})
+	end)
+end
 
 
-,nil,nil;(function() _msec=(function(e,o,n)local A=o[(-0x3b+(-0x4d+161))];local E=n[e[(728+-0x76)]][e[(797+-0x4f)]];local i=((0x35a/78)+-#"niggers")/(-#[[niggers]]+(0x78-(-#"Impulse youtube real"+((-#"paidlancer"+(356+-0x26))-177))))local r=(-0x46+((12467/(0x3d02/114))+-#'made by kim jong un'))-((0x86+-109)+-#'fatee is gay 0nly on top')local j=n[e[((70476-0x89c4)/216)]][e[(18348/0x42)]];local B=((((0x1b2+-73)+-94)+-0x54)/0xb7)+(-0x71+115)local U=n[e[((1157-0x251)+-#"real roblox omg builderman caught playing real")]][e[(1807-0x3bf)]]local d=(0x34-50)-(-#'Faggot'+(((-91+(0x5d92/118))+-#'yeet')+-101))local s=(0x74+(((45+-0x69)+-8718)/77))local O=(-#{{},{},(function()return{','}end)();(function()return#{('mHoFmH'):find("\111")}>0 and 1 or 0 end)}+6)local x=((-103+(0x113+((-0x3450/248)+-0x40)))+-#"If LocalPlayer equals Dumbass then while true do end")local f=((-15-(0xc9-(163+-#{14;",";65,1,'}','nil'})))+61)local b=((-#{",",{},",",'nil';'}'}+70)-0x3f)local u=(((-#"Luraph v13 has been released changed absolutely fucking nothing"+(0x129-((-0x1c5c/132)+0xde)))-44)+-#"impulse loves moonsex")local N=(-#'testpsx dupe no scam legit 2022 free no virus'+((((-8616+0x10a8)/0x80)+0xf4)-0xa1))local M=(0x40-(0x2364/(((-#'testing this thingy lololollez'+(452-0xf7))+-0x13)+-#"negus")))local m=((((286+(-#"Fucking losed 027728272728271"+(-0x17-19)))-0x77)+-#"goofy ahh uncle productions")-65)local P=((-#'mf stfu'+((-30752/(-#{{},{};",",'nil','nil','}'}+254))+0x68))+31)local C=((0x89-(236+(((-0x4b+12)+-26379)/226)))+-#"FranzJPresents")local S=(7+-#{'}';(function()return#{('lOokOH'):find("\111")}>0 and 1 or 0 end),1})local c=(((0xf4+(((73+-0x72)+-11978)/0x65))-113)+-#[[holy shit]])local h=(((-108+(((-0x3bd2/247)+-#'Crackzzzz')+313))-115)+-#"warboy hates you")local w=(222/(((-55+(-950625/0xe1))/0xd6)+94))local k=((-0x203a/(129+-#{'}',",",'nil','}'}))+69)local t=((-#{",",'}','}';'}'}+46)-39)local g=(10+-#{",",'nil',166,1,(function()return{','}end)();(function()return{','}end)();","})local G=e[((191080/0x88)+-#"If no milk then return ffather")];local q=n[e[(166+-#{{},(function()return{','}end)(),{}})]][e[((23400/0x2d)+-#[[Me be like at 5am in the morning]])]];local K=n[(function(e)return type(e):sub(1,1)..'\101\116'end)(';=!=&+:=')..'\109\101'..('\116\97'or'//^:.==_')..e[(0x454-590)]];local L=n[e[(522+-#{28,1,58,28})]][e[((0x7b6-1002)+-#'Bwomp')]];local y=(-#{45;{};",";45,(function()return#{('hOmbKM'):find("\109")}>0 and 1 or 0 end);1}+8)-(382/(((0x154d5-43653)/0xda)+-#"0nly segc"))local z=((((14768/0x47)+-#"nico der hurensohn")+-100)-88)-(-#[[anime is for fags]]+(0x56-67))local H=n[e[(29503/0xb5)]][e[(0x318-438)]];local o=function(o,e)return o..e end local p=(452/0x71)*(-67+(((0x208-321)+-#"cilertedcool")+-116))local J=n[e[(0x38595/207)]];local a=((4960/0xf8)+-#'good googly moogly')*(-106+((0x12a54/244)+-79))local I=(0x81a-1050)*(((-18841/(0x13f+-92))+109)+-#"0nly 1337 smashed ur wap")local T=((((0x2127/(-0x2a+83))+-#[[good googly moogly]])+-0x75)+-#"Impulse youtube real")local D=((((0x2bb2-(0x3c648/44))+-#[[Impulse youtube real]])/231)+-#[[I FUCKING HATE FEMBOYS]])*(-82+0x54)local v=n[e[(-#'MSC 793z487nhvcgsdfgsudfza9889jgvz56gz56z547684z5g54z948g56z74j56475jzg645z6456 oh wait bitch'+(72044/0x3e))]]or n[e[(((-#'never gonna give you up never gonna let you down'+(9598512/0x4d))/236)+-#"bigchungus")]][e[(-#'MSC 793z487nhvcgsdfgsudfza9889jgvz56gz56z547684z5g54z948g56z74j56475jzg645z6456 oh wait bitch'+(72044/0x3e))]];local _=(((-0x6f+1213)-571)-275)local e=n[e[(12830/0xa)]];local F=(function(_)local a,n=1,0x10 local o={j={},v={}}local l=-d local e=n+r while true do o[_:sub(e,(function()e=a+e return e-r end)())]=(function()l=l+d return l end)()if l==(p-d)then l=""n=y break end end local l=#_ while e<l+r do o.v[n]=_:sub(e,(function()e=a+e return e-r end)())n=n+d if n%i==y then n=z L(o.j,(H((o[o.v[z]]*p)+o[o.v[d]])))end end return U(o.j)end)("..:::MoonSec::..!*%&/+^,;.:_#$}=$^.&+%**$!;=/}!$$/;_/:!.=:;:/^!+#/=^_,^&=/,=&}=$_#,_&:}.=,&=&:=+_/,&./^:%/$/!=}$:#^_%:}.:#^,%^}+!,#_;&+&;*^_*}$$.#:};&&$}*#.+,&#}.:+,/&+$^.:*/#$;#/_,$&$=:_!,/%#^,/&!%#*;!&==}%$_#+#=:_.,;/.&*_+,,&&=;_*,!%=}}=:^#%}}::#^;%;}^:_:}%&}+:*^,*=$=.$+#*_$}:!+;*,$^.#+/*/$%:&;_!=$*;$+%!_#:;./;+/#^;;//!^#%;%/!==!},$&==__#,.&;=,#;..&/=^_%,&&!}=:},=/&}_:}^.%#},:^^+&^}&:%^^%!}*.}+$*#$_.:+.*}$,.^++*/$&:/+**!$^;}/=!##_;:/$!;#,;_/+%*#&;&/*!!}.,}/^=#_=,:&.=;#.;#&+=}_&,.&*=!:=;}%$}#_+^:&&};:#^^/+}/:&^$%*}!.=+=*$$#._+:%^$;.=+^*+$/.&+%**$};=+^!$##;_/:!.#;.%/^*&#/;+/%%*#!,=/.=$#,,_&$=._;,,&^!!_/,+&%=&_!^=%}}$_,^_&+}.:_^,/^}+:/^}%%}#:!^,*}$$.#+_%/$..:+,*;$+./+&*%$+.!+;!}$,;#/_!:#..*/,!.#+;^/&%%#*;!/%=}#^,#/&=:_$_!&,=__+;*&&=&_*;%^:}}_%^#&*}::.^;%,}::+^.%&}&:*^/*=$}}$+#*=$:._+;*,$^.+.:*&$%.*+*!=#};$/=!##:;./;!,#^;+//!&#%;*/!!^_},$&#=_=_,.&;=,_,,+&/=&_%,*&!}=:}^$%#}_::^.%;},:^^+%/}&:%^*%!$=.}+$*#$}.:+.*;$,.^++*/$&.%+**!#=;}/$!##_;:/_!;#,;^/+!/#&;%/*!*_=,}&$=#_$,:&.=;/=,^&+=/_&,%&*=!:=;,&%}#:_^:../_!;$%.*!%:&^%%*=%#&+}*=$#.#+:*.$;:.,:*+$,.&+&**$!;=^!/;##;=/:!_#;;,/^!_$=;&/,!*#!,=&==$#!,_&:/+_;,,&^=,_/,&&%=*=#^=%}}$:#^_%:}.:;_&%^}+:/^^%%}*:!+=^:$$.#+_*_$..;+,*^=+./+,*%$&.!+!!}$&$!/_!:#..//,!,#+;+/&!^#;;!&==}#.,#&#=:_$,=&,=^_+;}&&=&_*,^/,}}:$^#/+}:::^;%;}^:.^_%&}%:*,:*=$=.$^%&&$:.:+;&*$^.^+/*&$%.++,!=#};$^^!_#_;./;%!#^;.//!+#%;//!==$,,$/*=__$,.&:=,_#_.&/=,_%;^&!=!:},%%#}=_*^.%;},__^+%+}&:^^;%!$=.},,*#$#.:+.&*$,.:++*^$&.++**!};;}+%!##};:/_!;#$.}/+!;#&.#/*!*_=;&&$!!#%,:&.=;$*,^&^=/_,,.&*=!:=;.%$}$:_^:,;};:_^^%+}/:&^%%*}%.=^%*$$$._+:*.$;},+^*.$/.++%**$!;=./!$##;_/_!.#;;,/;;=#/;&/%,}##,=&}=$*=}::;^$*$}+::%%%;}#:%+^%$,,%}}$:#_!:%/}!_$#.:/:!;//%.}*:!+=,//%==#=;./_#_,!*:$+./+&^%&%!%#&,%$;;#/_!:*#$,.+/,%/$!.%/&!+#+;&#^#^,#&_=:*#}!.;^;*^$,:,+,%&__&%}}:$^#,%/=*$;*%=}^:+^/^^/&!$##;*&=!!#,^^}+..+;*,*}!.#;;&%+=^#%;+&,=!_*:*$!;./;!,*&}:_;^_&*}+$^!/_},$&#+}%.}+:,^..,,$&/=&_%_:.}^%%%#}.:/}!=/:&&},:^^+;,/_!,#/;_/%==#.;;/!!#+.%/$,.^++;/&;=/_/^=&/!^_%^=/!=}:}_,#=;^/+!/!_=,:}^*%$}$:^^!.#;/&.=;_,#!;;/&!*_,.=+&*}$%.%_/_!^:%.};}:#};:+,*,,_%+}!.=+}^;/}!.#^}*$$.,+^*+*,==#*;;&}&}+&!$##;_.=/$&*=/,;*}#.;&/%!*!$}}:#^%&+#^&==._;,,;.+;%&}+.,&#_^^=%}}$=#$,;_^%!$$.&=}.:/^&%%/;!*##;&$,:*+_*:$.}:#!,$&$!;+&*:$*.!/=;;&*=$:+,%*$$!_*;&##;//&!%&&}+_!,&%%}=:=*&#},;&,=^!!$$.,*%%;$.:&+^#$$=.&+&*$;;;#+}*+$!.%/_*+#/&/$}.$+#,=/&!#__;^/;=.;%,:&.#!_,^!*&$+,};!%/!*.$,%$=;.//!&#%$/:=^$*=,,/%=__:,.,.^/%+}::%^,#_,_&!}=:}##;_+}!=##.$+.!_#:.+,.:$^*%!$=}:##,=&#!^:.;/&;!=_:;^&,.#+**!#=$+_%;!*}}=__,}&!}.::.:##;%/*!!*^$=:.^,%}}:.}+$*_+,&.=/_&,%,.++*!$%%$=&:_^:%.&_*!$;;$+.*+$^;+}..=+}*$/&=##,,}/_=##/;;&.;$+_**$!;=.!,#&!!/.!,;&:}::_*}#;;&/%!*&!}!_!,*_^#/&:=._;$=::^.%/:$^*%!%,}^:+*_*}$:;#++*,$=+//;*&$!+*&+!;$/;_&=!=;:+_/==.#_,,/,#%_/;+&.!;;};^!:_$;!&:}=!*;/&,=:_/^./;&!=%:#+=&*_.;_^;%!.}:#^.*:}^:*+&*}$+^#^__*^#%_}:=,#..//_%%^=%&}%:*:*;&/_!^#:^$&=!^#,;_&_=.+_*&$%.*.&,}/!=%.&;!&&^:+/!,#^;+.;,+%_};:,^/&!#%_%^!%;}$;&!!_^,+&//!*&$;.}+;%%}%.!+!=+^=%;},:^$$.//^!&#$;#;}:_+$*#$_=_#.;*!^!$_:,^&_!*#!,_/%_$^^*%#_;:/.,_%=},:.,&&:_//+!!_=,}:/+$%;$=+%=:_,,^&+*}$$;_/+=!:=^};!+**=_:._+**/#,.,+$=&#&.&+/}%:/;=&$!;_=&%$#.,+^*+*#=;_&,+_*.%/}!$##}#_:,%#;;=/^!+#/=,_*,/&/=*:,^_%&.//&=._;,,,;^/*;}#,;^!%%$%.&*=_^^_%:}.=%$:.++&};#;;++!!/#/}^}#.#+_*:&$!__$&^&}!,,&,:&%!%_#,:&%==_}&#$!;;/,!^!$}.:/^^%^=%_%^%#*,#&_=:!*$$.;+:!!;!&&=%_*_..$^/*#$,.!&$!}$:.$/_*,.;%&}%:*}!.+,;=..$#:}%..+;*,%.=:#;^^&+!!#%,/!!.!/#!_#:#:.;+!,+;.//!&#%$*;=+%*%=:&==__:,.:_,!%/:,&;=&_%,*.,+!*_$%.!}=::^.%;+_*=$+;.^!::^*%!$=}^$*.!/_}:#;;_/_,,+;*/$&.%:^;%&_+^+=!##_;:_%,_%^=.:},^%_=,_&,/*}}*:.^_%}}=:_+$!%,:&+=/_&_/:!+/%;;,&+}#:_^:,#/_*.#_.&%_*;#__,}*.=+}*$&_^&+}*.$;.,:!;;/&!*};*.$!;=/}^!&*=._},%&^}#_%#$#;;&/%!*!&}!_*^+.$;%&:=._;_=::^.%/_:.,^+=_,;%}}$:#:}.%/:*:#;;.+.!.$+_;}.:!+=*}&=!+#=/;&_*!#^;;.$._+&*%$*}!__^=/^=*_$,$:::./,!^#+:}^$++&!}$:/^$%_}*+_&=&*$$.:^_%.$..,*%!:$=:/^!#$_=;}+#*%$;._!,#=;}*$+::*^!*=/^**$!;_/$$&;,/^&:=}#,,^/*!&_/&$&*=#_.&:%_=._*&^&$}::^^_&*=!:_,%}$_^,&%=}:_%^:%,}=::^_%&}%:;^&%,$=:!^+*:*,$#,;+}*#_^.+/#$_$:+!&/!+#++///}+._^!*$=:#_+^//=;#:+**^=}#+,_!%$,#!/.%$#:,^^&*;=/,+,:!.#:_&/}*/#=;;^}**#/.}^:!;$},_%+=,_:;&&#%&:$,:/:$$.;%_}/:&^%;^/$!*#&;*/=._^%*.$;.,,^;#&$!,_:&*=:_.*^*;##;_/:,+%$};::^:&^=^_^^%&/=%&;!;_#,_&://!:#+;%+/!!#%,&&+=+_&=^=^:#^_%:^!!.$&.*+;*/#;;,/+!/^;*}$$.#_%;./_!&#:;^&^=,_;,^$$.!/=!}!}=!:=/=/*=#_.^,!;}+_^^:+,;}&==}_$#::!,*%$},:+^.%/$::,&#!/_=,$&._;^#%_}:!$#$.:/.*,#$.&+^!:#=;$*!:%+#*_$:!%#+,;&$=:}:*$$%.*+!+^&&!*.=,!&#==_*^:%_^^/}!&#%;*:.,%%:}!:;^:%$}}::+#,};*&/=&_%#*:%+}%%$#,=+;!_$#.!/#*;/^%,}&:%^*^+&%}}:;%,$_.:+.^/&#=,_.,./+=/#!,*/*=%=#**#_;:/./}&^=;:;^.%,;_/*!!_=#}:.+$&/$=:_&=%#$=&+=._&,%&*^/*;}%..+*;#,:%.};:,#,.++/!=#_;//**&#,;#/:#:#/;#/,!+;;*_$/.&+%+}&==$_.,%/+$^+/!.#;;,.*^}%,}}.%^$%*=;:&^=%!;%&:=._;_:.=^.*$}$.,+=,;,/%}}$:#_&..+,!$}!%!}=:/^&%%&/*+$*;/&}==#!^*/}!*$/%!$+./+&+;&:!%_/^*&%=}#*^=&_;;+*!^#+;/.;,+%^=%:$+=%:}*,+*:&^;^&,=^_+$_./+=*^}&./+#%!$*+:+%*$$#.,&*:#^/%&}%!.$/.&/}$,;_/:%+:%+;*,$^};#$;*&&!*#&,/}}}+_!!=#:;./;,.%=};:#..#:;*/!==&%}#::,!%,$_.$^.^+;^&/=&_%#&.++=*:$^;=/#*}#};#&:*:$/.^//!.#^;/}}.}+$*#*#=}_$+$/$=_#&;;*_=&_=,/&_=&_=&}#=;:/.!;&_}=_%^.%,;_/*!!_==+:%+}%&}.:;^&!!_:^,==_&,%&*&&*;}%.^^^*!$;.#+!*!$^!^},:&^%%*%#!/#+.:$=._+:*./^=##$.%$=.&+%**/&=/_*;%&}=!:.,+&,};::!+#_;&/%!*%/};_*^!%_}$.}=._=,,&^=+*,}%:!^+*+$$:%*=_;^_%:}.*!$_.:++!&$+;,+%*+#/.*+**.^_*:$..;.=;_/%=+#*;*&:=/:*,$&#!!._^_&_=#^!!##+;//&+/%^}$:},%%%*%/%=:_.,;.$^;%/}*;+&.=&&;&*}}:$^#.:+$:&,!%,}^:+:#.,+^**_!;}+***%/%/$:..+;;}/+!,_=;^/%=%_&,//_.+/#!_#:#__,^_&=##_$,+&*.:/#==_},$;=^/*}#%::&;*$#:;^++*^_,%:=::}^$%#&,*.##;.+&=^$*;++#!,$&.$}%.}+$*#+!!##+=.}=.^++*//&=&#/;/&/=!_^,:=.}$_;,+=^=;:^,_=%=,;#&&=^#/:,/*^:,}&.=;_,#%.:+:%,%*&.=!:=^}^=+_!=}&,!^**.$+:*}/:&^%%&*}.=+}*$$$._+:*.}:$/+^*+$/_&+%**$!;=/}!$##;_/:!.#;;,/^!+#/;//%!*#!,=&}!=_#,_&_=.&$,,&^=+#^,&&%=%_!_.%}}$:#.*%:}.:.^,%=}+:+^&&=}*:/^^*}$$.#^/*:$:.;+,+#$+./+&*&$*.!/=*!!_;#/#!:#.;;/,!^$,.!/&!&#*.:&==}_$;},^=:_:,;,}=^_+,/&.&#_*,*%=!!:$^$%_}::.^#%}}^:+^/&+}%:%^!&*!%.$+$*_==..+;*,$#$=+/*/$%:&+!*!#};$/#!=$*;./;!,$;;+/+!&#^;;/!==_}_/&#=#_:;_,&=,_,,+/%=&_%,*&^&.:}^}%#!/::^:%;},:^^.%_}&:%^*&.$=.=+$%}==.:+:*;&,.^++*/$.$#+***#=:,/$!$#_;:/.!##};^/+!/$#;%/%!!#&;+&$=#___*&.=._,;;,!=/_/,%,&=!:=^}&&%%:_^_%.!+:,^,%+}+:&^^%;}!.=+}&:$#.#+:*$$=.,+^*+=/.&+&**}%_&/}!}##=_/:!.#;;$,#!+#+;&,.!*#*,=&==$#!;%&:=._;:}&^=^_/;+^$=*_*^=:;}$:#^_&!*=:;^;%^!.:/^/%%}%:!^&%+$$.#+_&}$...+,*:$#./+&*%=;.!+!!}$=_!/_!_#.$//,!^#+;:,.!%#%;!,^=}_},#&#=:_$,=&,=^_+:_&&=&_*;%^:}}:}^#;%}::.^;%$&!:+^+%&*!:*^**=$}.$^!%%$:..+;/+$^.^+/%+=^.*+*!=}!;$/#!_$!$&/;!;#^_&//!/#%;*/!!&#+,$&#=_};,.&.=,_:,#&/=&_%:;&!=!:},=^,}_:_^.%$},:^^+%:*.:%^%%!**.}+}*#$#.:+$*=$,.^++/^$&.&+**/$^;}/$!#!*;:/:!;$.::/+!+#&:!/*!!_=;/;,=#_#,:^==;_;,^&+=/_,,.&*=!:=:/%$}$:_^}&!};:,^^+#}/:/^%&&!/.=+=*$=;._+:*.}:__+^*,$/}^+%**$!;=;*!$#=;_/:!.#:;,,^!+#/;^/%,$#!;*&}=$_#,_&}=._.,,&^=+_/,&&%=^_!^=%}=%:#._%:}.:$^,;_}+=^^&&/}*:!^+*}/:.#+_*:}_.;+,*$$+#^+&*%$*_!/=!}$/;#+%!:*:;;^,!^#+;_/&!.#*:*&=*}_$,#/%=:#!,;^*=^#,.;&&=:_*#+%=}}:$^#&:}:_%^;%;}^:+^/&+}%:*^:*=**.$+#*_$:..+;*$$^._+/*$$%:*+!!=$&;$:;!_$!;.,;!,#^;:///,#%=%/!**_},$/%=_%#,.&;=,#;,+&/=:_%:=&!}=:}^$%#}__!^.%:},:;^+&/}&:%^^%!}:.}^&*#$_.:+.*}$,.^++*+$&:/,+*!$^;},^!##_;:+_%.#,;}/+&_#&;%/**%_=,}/^=#}$,:&.=;$,,^&+=$_&,_&*/}:=;!%$}#_^^:,:};:,^^%+}/:&^_%*}_.=^!*$=#._+:%%$;:!+^&^$/_&+%**$.;=+,!$=^;_/:!.#;;=/^!,#/;+/%!*#!,=/+=$#&,_/%=.#;,,&^=__/=:&%=;_!,=+!}$_*^_;,}.:}^,%^%/:/^,%%}^:!^!*}}$_}+_*$$.}#+,*:$+:^,;*%$+.!;*!}#$;#^_!:#.;#/,!:#+}%/&*/#*;!/+=}#^,#&_=:_.,;&,=:_+,:&&=/_*.!%=}}_*^#%=}:_.^;%,}^:+^:%&}+:*^!*=$}.$+#*=$:.=+;*.$^.++/*&$,.*+!!=#=;$,#!_#:;}/;!;#^}_//*+#%;*/^==&_,$&#=_#!#&&;=$_^$$&/=/_%,*&!=&_+^$%#}_*%^.%.},::^#%/}&:%$&%!}!.}^=+,$_:!+.&&$,.^++*:*$.%+,*!&_;}/}!##_;:/$!=#,;^/+,!#&;&/*!/#^,}&$=#%$,:&:=;#._*&+=:_&=/&*=!:=,/,,}#_*^:..};:;^^%+}/:,^.%*}!.=#}*$$$._+}%!$;.,+^;,$/./+%%&!_;=+/!$!};_/:!.};:$/^!_#/;./%*##!.*/:=$#%,_++=._;,,&^=:_/,.&%=*_!,&%}=$:#^_&!}.}}^,%;}+_/^&%%},:!:,*}}*.#;_*:$..}+,%!$+$++&%%$*.!++!}!;;#+!!:$_;;/,!$#+.=/&!%#*;!&==}#+,#/*=:_.,;&,=^_+,_&&=/_*,*%=}}:$^#%_}:::^;%,}^:+");local U=(-#{99;(function()return#{('HkMhhL'):find("\77")}>0 and 1 or 0 end);30;(function()return#{('HkMhhL'):find("\77")}>0 and 1 or 0 end);","}+70)local l=44 local n=d;local e={}e={[(118+-0x75)]=function()local d,o,e,r=j(F,n,n+B);n=n+D;l=(l+(U*D))%_;return(((r+l-(U)+a*(D*i))%a)*((i*I)^i))+(((e+l-(U*i)+a*(i^B))%_)*(a*_))+(((o+l-(U*B)+I)%_)*a)+((d+l-(U*D)+I)%_);end,[(-#"MSC 793z487nhvcgsdfgsudfza9889jgvz56gz56z547684z5g54z948g56z74j56475jzg645z6456 oh wait bitch"+(286-(0x1dc-285)))]=function(e,e,e)local e=j(F,n,n);n=n+r;l=(l+(U))%_;return((e+l-(U)+I)%a);end,[(-#'free bobux no skem'+(0x1068/(0x1ad-229)))]=function()local e,o=j(F,n,n+i);l=(l+(U*i))%_;n=n+i;return(((o+l-(U)+a*(i*D))%a)*_)+((e+l-(U*i)+_*(i^B))%a);end,[((-0x2a+60)+-#'FranzJPresents')]=function(o,e,n)if n then local e=(o/i^(e-d))%i^((n-r)-(e-d)+r);return e-e%d;else local e=i^(e-r);return(o%(e+e)>=e)and d or z;end;end,[(0x44+-63)]=function()local o=e[(82+-0x51)]();local l=e[((162-0x8f)+-#[[nico der hurensohn]])]();local x=d;local n=(e[(122+-0x76)](l,r,p+D)*(i^(p*i)))+o;local o=e[(-#'dies of cringe'+(2646/0x93))](l,21,31);local e=((-d)^e[((1093-0x241)/129)](l,32));if(o==z)then if(n==y)then return e*z;else o=r;x=y;end;elseif(o==(a*(i^B))-r)then return(n==z)and(e*(r/y))or(e*(z/y));end;return E(e,o-((_*(D))-d))*(x+(n/(i^T)));end,[((642/0x6)-101)]=function(o,i,i)local i;if(not o)then o=e[(-0x4b+(252-0xb0))]();if(o==z)then return'';end;end;i=q(F,n,n+o-d);n=n+o;local e=''for o=r,#i do e=G(e,H((j(q(i,o,o))+l)%_))l=(l+U)%a end return e;end}local function I(...)return{...},J('#',...)end local function F()local u={};local f={};local o={};local b={u,f,nil,o};local n={}local s=(0x81-102)local o={[(0xc8/50)]=(function(o)return not(#o==e[(-#[[papier ist ein kleiner schwanz lutscher]]+(0x5ed/37))]())end),[(-#"niggers"+((0xbf-144)-38))]=(function(o)return e[(0x41-60)]()end),[((-111+0x7d)+-#"FranzJPresents")]=(function(o)return e[(0x6c+-102)]()end),[(0x2c-41)]=(function(o)local l=e[(0x38a/151)]()local o=''local e=1 for n=1,#l do e=(e+s)%_ o=G(o,H((j(l:sub(n,n))+e)%a))end return o end)};for e=r,e[(191/0xbf)]()do f[e-r]=F();end;local l=e[(-#'if syn request then print your mom then end and then kill yourself'+(11658/0xae))]()for l=1,l do local e=e[(0x37-53)]();local d;local e=o[e%(87+-0x3e)];n[l]=e and e({});end;for b=1,e[((0x5fa/51)+-#"use luraph if want lost money")]()do local o=e[((0x2f-35)+-#'send nudes')]();if(e[(35-0x1f)](o,d,r)==y)then local a=e[((0x66+-53)+-#[[testpsx dupe no scam legit 2022 free no virus]])](o,i,B);local l=e[(-#[[lego hax]]+(0x7a+-110))](o,D,i+D);local o={e[(0x192/134)](),e[(-#[[10 black dicks in your mouth]]+(-0x21+64))](),nil,nil};local _={[(-#'free bobux no skem'+(79-0x3d))]=function()o[w]=e[(-#"papier der afghaner wurde von nice dem bombenleger gefickt"+(-24+0x55))]();o[m]=e[(-#[[algebra]]+(0x8c0/224))]();end,[(-#"zykem krul"+(-0x18+35))]=function()o[h]=e[(0x21/33)]();end,[((71+-0x39)+-#'impulse 2022')]=function()o[t]=e[(67-0x42)]()-(i^p)end,[(0x177/125)]=function()o[h]=e[(-#[[cilerteddoesntlikeburgers]]+(0x1916/((60996/0xcc)+-#[[If LocalPlayer equals Dumbass then while true do end]])))]()-(i^p)o[P]=e[(0x12/6)]();end};_[a]();if(e[(-#"waste of sperm"+(-0x23+53))](l,r,d)==r)then o[x]=n[o[x]]end if(e[(-81+0x55)](l,i,i)==d)then o[c]=n[o[k]]end if(e[(-0x66+106)](l,B,B)==r)then o[S]=n[o[S]]end u[b]=o;end end;b[3]=e[((0x5a/6)+-#'Daddy fuck me')]();return b;end;local function z(e,D,U)local n=e[i];local l=e[B];local a=e[d];return(function(...)local j=J('#',...)-r;local B=n;local e=I local F={};local n={};local y={};local e=d e*=-1 local e=e;local _=l;local p={...};local a=a;local l=d;for e=0,j do if(e>=_)then F[e-_]=p[e+r];else n[e]=p[e+d];end;end;local e=j-_+d local e;local _;while true do e=a[l];_=e[(-104+0x69)];o=(637140)while(-23+((0x573a/203)+-#"never gonna give you up never gonna let you down"))>=_ do o-= o o=(5564538)while(0x72-95)>=_ do o-= o o=(1692558)while _<=(107+-0x62)do o-= o o=(135873)while((-96+0x6d)+-#'holy shit')>=_ do o-= o o=(639764)while _<=(47-0x2e)do o-= o o=(6307161)while(53-0x35)<_ do o-= o if(n[e[f]]~=e[P])then l=l+r;else l=e[g];end;break end while 1913==(o)/((0x1a2b-3402))do n[e[s]][e[w]]=e[m];break end;break;end while(o)/((0x1eea-4013))==164 do o=(1575396)while(0x48-70)>=_ do o-= o n[e[x]]=(e[h]~=0);break;end while 783==(o)/((-#'mama mo'+(147387/0x49)))do o=(6525742)while _>(639/0xd5)do o-= o n[e[b]][n[e[w]]]=n[e[M]];break end while 1678==(o)/((-#"Deeznutsbutinlualoo"+(7849-0xf65)))do local o=e[b];local l=n[o];for e=o+1,e[t]do L(l,n[e])end;break end;break;end break;end break;end while 279==(o)/((-82+0x239))do o=(7464541)while _<=(0x1b6/73)do o-= o o=(84396)while _>(57+-0x34)do o-= o if n[e[s]]then l=l+d;else l=e[g];end;break end while 1623==(o)/((215-0xa3))do local o;n[e[x]]={};l=l+d;e=a[l];n[e[s]][e[g]]=n[e[C]];l=l+d;e=a[l];n[e[f]][e[h]]=n[e[S]];l=l+d;e=a[l];n[e[u]][e[w]]=e[M];l=l+d;e=a[l];n[e[s]][e[k]]=n[e[N]];l=l+d;e=a[l];n[e[s]]=U[e[t]];l=l+d;e=a[l];n[e[s]]=n[e[h]];l=l+d;e=a[l];o=e[x]n[o](n[o+r])l=l+d;e=a[l];do return end;break end;break;end while 3493==(o)/(((-55+-0x10)+0x8a0))do o=(1587790)while _<=(777/0x6f)do o-= o l=e[w];break;end while 1913==(o)/((0x68f-849))do o=(13509)while _>(48-0x28)do o-= o D[e[c]]=n[e[b]];break end while 57==(o)/((-#'papier ist ein kleiner schwanz lutscher'+(0x133+-31)))do if(n[e[b]]==n[e[M]])then l=l+r;else l=e[t];end;break end;break;end break;end break;end break;end while(o)/(((268932/0x92)+-#"moonsec got deobfuscated"))==931 do o=(12599092)while(-0x6d+(0x16f-244))>=_ do o-= o o=(12728240)while _<=(126-(0x286e/90))do o-= o o=(784220)while _>(0x34+-42)do o-= o n[e[O]]=D[e[c]];break end while 347==(o)/(((424950-0x33e1e)/94))do local i=B[e[h]];local _;local o={};_=K({},{__index=function(n,e)local e=o[e];return e[1][e[2]];end,__newindex=function(l,e,n)local e=o[e]e[1][e[2]]=n;end;});for d=1,e[P]do l=l+r;local e=a[l];if e[(34-0x21)]==76 then o[d-1]={n,e[c]};else o[d-1]={D,e[h]};end;y[#y+1]=o;end;n[e[f]]=z(i,_,U);break end;break;end while(o)/((6690-((391500/0x74)+-#"Impulse real 2022")))==3820 do o=(11851136)while _<=(52-0x28)do o-= o U[e[h]]=n[e[O]];break;end while(o)/(((0x8b163/169)+-#[[goofy ahh uncle productions]]))==3544 do o=(844800)while(2522/(0x129+-103))<_ do o-= o n[e[O]]=D[e[t]];break end while 512==(o)/((-#"bigchungus"+(0x2a8dc/105)))do do return n[e[O]]end break end;break;end break;end break;end while(o)/((0x55a97/87))==3124 do o=(12978828)while(0x9a-138)>=_ do o-= o o=(1728522)while _>(0x88-121)do o-= o local o=e[x];local d=n[o]local _=n[o+2];if(_>0)then if(d>n[o+1])then l=e[k];else n[o+3]=d;end elseif(d<n[o+1])then l=e[h];else n[o+3]=d;end break end while 881==(o)/(((109267704/0xea)/238))do local _;local o;local i;n[e[f]]=n[e[g]];l=l+d;e=a[l];n[e[u]]=e[c];l=l+d;e=a[l];i=e[w];o=n[i]for e=i+1,e[C]do o=o..n[e];end;n[e[b]]=o;l=l+d;e=a[l];n[e[x]][e[k]]=n[e[P]];l=l+d;e=a[l];n[e[u]][e[c]]=e[P];l=l+d;e=a[l];n[e[u]]=U[e[t]];l=l+d;e=a[l];n[e[f]]=e[g];l=l+d;e=a[l];_=e[f]n[_]=n[_](n[_+r])l=l+d;e=a[l];n[e[s]][e[c]]=n[e[m]];l=l+d;e=a[l];n[e[b]]={};break end;break;end while 3372==(o)/((7808-0xf77))do o=(552330)while _<=(-#'monkey mode'+(3332/0x77))do o-= o n[e[x]]=(e[k]~=0);l=l+r;break;end while(o)/(((4506-0x8fb)+-#'nate higger nuck figgers and nill kiggers'))==255 do o=(1844484)while _>(3726/0xcf)do o-= o if not n[e[x]]then l=l+r;else l=e[h];end;break end while(o)/((0xd87-((0x4f39a/182)+-#"Faggot")))==1094 do if(n[e[x]]~=n[e[N]])then l=l+r;else l=e[h];end;break end;break;end break;end break;end break;end break;end while(o)/((0x14ed-2711))==2103 do o=(4317184)while _<=(0x9e-129)do o-= o o=(1475863)while _<=(-0x7a+146)do o-= o o=(2957980)while(-#"FranzJPresents"+(163-0x80))>=_ do o-= o o=(2250688)while(-0x53+(15656/0x98))<_ do o-= o local e=e[u]n[e](n[e+r])break end while 1112==(o)/((4164-0x85c))do n[e[u]]=n[e[c]]%e[C];break end;break;end while(o)/((-#"nicowashere"+(0x26c6e/70)))==1310 do o=(24301)while(((0x3274-6508)/0x59)+-#"da hood money generator 2022 working free no virus")>=_ do o-= o local P;local _;local g;local o;n[e[b]]=U[e[w]];l=l+d;e=a[l];n[e[b]]=n[e[k]][e[N]];l=l+d;e=a[l];o=e[s];g=n[e[w]];n[o+1]=g;n[o]=g[e[M]];l=l+d;e=a[l];n[e[s]]=n[e[t]];l=l+d;e=a[l];n[e[s]]=n[e[h]];l=l+d;e=a[l];o=e[b]n[o]=n[o](v(n,o+d,e[w]))l=l+d;e=a[l];o=e[u];g=n[e[h]];n[o+1]=g;n[o]=g[e[S]];l=l+d;e=a[l];o=e[u]n[o]=n[o](n[o+r])l=l+d;e=a[l];_={n,e};_[r][_[i][x]]=_[d][_[i][M]]+_[r][_[i][c]];l=l+d;e=a[l];n[e[O]]=n[e[k]]%e[C];l=l+d;e=a[l];o=e[f]n[o]=n[o](n[o+r])l=l+d;e=a[l];g=e[c];P=n[g]for e=g+1,e[m]do P=P..n[e];end;n[e[O]]=P;l=l+d;e=a[l];_={n,e};_[r][_[i][O]]=_[d][_[i][m]]+_[r][_[i][c]];l=l+d;e=a[l];n[e[O]]=n[e[c]]%e[m];break;end while 19==(o)/((0x167b8/72))do o=(8896206)while(0x1409/223)<_ do o-= o if(n[e[x]]==n[e[m]])then l=l+r;else l=e[g];end;break end while(o)/((2492+-0x32))==3643 do local r;local _;local o;n[e[u]]=e[c];l=l+d;e=a[l];n[e[b]]=e[c];l=l+d;e=a[l];n[e[x]]=#n[e[k]];l=l+d;e=a[l];n[e[s]]=e[t];l=l+d;e=a[l];o=e[x];_=n[o]r=n[o+2];if(r>0)then if(_>n[o+1])then l=e[t];else n[o+3]=_;end elseif(_<n[o+1])then l=e[w];else n[o+3]=_;end break end;break;end break;end break;end while(o)/((962-0x201))==3287 do o=(5601288)while _<=(((13316-0x1a3f)+-#[[made by kim jong un]])/0xfd)do o-= o o=(7467500)while(0x14b4/212)<_ do o-= o n[e[x]]={};break end while 2900==(o)/((0x145c-2637))do n[e[s]]=n[e[t]]-n[e[S]];break end;break;end while 1732==(o)/((0x7e540/160))do o=(417175)while(-#[[if syn request then print your mom then end and then kill yourself]]+(0x126-201))>=_ do o-= o local _=B[e[k]];local d;local o={};d=K({},{__index=function(n,e)local e=o[e];return e[1][e[2]];end,__newindex=function(l,e,n)local e=o[e]e[1][e[2]]=n;end;});for d=1,e[P]do l=l+r;local e=a[l];if e[((-0x23+41)+-#'false')]==76 then o[d-1]={n,e[w]};else o[d-1]={D,e[w]};end;y[#y+1]=o;end;n[e[u]]=z(_,d,U);break;end while 1025==(o)/((-#"ÑÑÑÑÑÑÑ"+(64584/0x9c)))do o=(4623928)while(812/0x1d)<_ do o-= o n[e[s]][e[h]]=e[m];break end while 3229==(o)/((-#'mama mo'+(0xbb2-1555)))do local e={n,e};e[r][e[i][f]]=e[d][e[i][N]]+e[r][e[i][h]];break end;break;end break;end break;end break;end while 1088==(o)/((0x1f25-4005))do o=(11931360)while _<=(0x1af6/203)do o-= o o=(12949302)while _<=(((-#"Cock and ball tortue"+(0x1700-2956))/56)+-#'impulse reel pastebin')do o-= o o=(9980750)while _>(630/0x15)do o-= o local e=e[b]n[e]=n[e](n[e+r])break end while 3071==(o)/((435500/0x86))do n[e[s]][e[k]]=n[e[C]];break end;break;end while 3793==(o)/((0x1b07-3505))do o=(11683161)while((-#"FranzJPresents"+(0xae+-112))+-0x10)>=_ do o-= o local e=e[b]n[e](n[e+r])break;end while(o)/((3427+-0x58))==3499 do o=(146831)while((-#"papier ist ein kleiner schwanz lutscher"+(22+-0x2b))+0x5d)<_ do o-= o n[e[u]][e[k]]=n[e[M]];break end while 359==(o)/((0x18f6a/(0x21c-290)))do local i;local _;local o;n[e[f]]=U[e[g]];l=l+d;e=a[l];n[e[x]]=U[e[t]];l=l+d;e=a[l];o=e[s];_=n[e[w]];n[o+1]=_;n[o]=_[e[C]];l=l+d;e=a[l];n[e[b]]=e[w];l=l+d;e=a[l];o=e[O]n[o]=n[o](v(n,o+d,e[h]))l=l+d;e=a[l];n[e[x]]=n[e[c]][e[S]];l=l+d;e=a[l];n[e[O]]=n[e[c]][e[S]];l=l+d;e=a[l];o=e[b]n[o]=n[o](n[o+r])l=l+d;e=a[l];_=e[w];i=n[_]for e=_+1,e[P]do i=i..n[e];end;n[e[u]]=i;l=l+d;e=a[l];n[e[b]][e[k]]=n[e[C]];break end;break;end break;end break;end while(o)/(((0x67d74/113)+-#"cilertedcool"))==3180 do o=(15267934)while(114-0x4e)>=_ do o-= o o=(5801845)while _>(-0x25+72)do o-= o n[e[u]]=e[h];break end while 3383==(o)/((0x54ff1/(0x104+-57)))do local o=e[O];local _=n[o+2];local d=n[o]+_;n[o]=d;if(_>0)then if(d<=n[o+1])then l=e[c];n[o+3]=d;end elseif(d>=n[o+1])then l=e[h];n[o+3]=d;end break end;break;end while 4037==(o)/((0xf13+-77))do o=(1189337)while _<=(0x1383/135)do o-= o local _;local o;n[e[x]]=U[e[t]];l=l+d;e=a[l];o=e[O];_=n[e[w]];n[o+1]=_;n[o]=_[e[N]];l=l+d;e=a[l];n[e[O]]=e[w];l=l+d;e=a[l];o=e[u]n[o]=n[o](v(n,o+d,e[t]))l=l+d;e=a[l];o=e[u];_=n[e[k]];n[o+1]=_;n[o]=_[e[S]];l=l+d;e=a[l];n[e[s]]=n[e[w]];l=l+d;e=a[l];o=e[f]n[o]=n[o](v(n,o+d,e[k]))l=l+d;e=a[l];n[e[u]]={};l=l+d;e=a[l];n[e[f]][e[w]]=e[N];l=l+d;e=a[l];n[e[x]]=U[e[c]];break;end while(o)/(((0x609-805)+-#[[arab porn]]))==1627 do o=(5100296)while(1786/0x2f)<_ do o-= o local l=e[h];local o=n[l]for e=l+1,e[P]do o=o..n[e];end;n[e[s]]=o;break end while 2092==(o)/((514418/0xd3))do n[e[b]]=n[e[k]][e[N]];break end;break;end break;end break;end break;end break;end break;end while 444==(o)/((137760/0x60))do o=(4916561)while(10738/0xb6)>=_ do o-= o o=(1637712)while _<=(-0x53+132)do o-= o o=(4283520)while(-0x47+115)>=_ do o-= o o=(3165836)while(2337/(-#'waste of sperm'+(0xc3-124)))>=_ do o-= o o=(9638352)while(-0x77+159)<_ do o-= o n[e[f]]=n[e[c]]%e[C];break end while 2479==(o)/((-0x7b+4011))do local l=e[b];local o=n[e[t]];n[l+1]=o;n[l]=o[e[C]];break end;break;end while(o)/((-#"i shoved a whole bag of jellibeans up my ass"+(0x150a-2706)))==1201 do o=(7248577)while _<=(-0x64+142)do o-= o n[e[u]]=n[e[g]];break;end while(o)/(((0x2a8f/5)+-#"impulse was here pastebin reel"))==3373 do o=(7691004)while(0xaa-127)<_ do o-= o do return end;break end while 4012==(o)/(((0xf8d-2044)+-#"33 cocks in my mouth"))do n[e[b]]=n[e[t]][e[M]];break end;break;end break;end break;end while(o)/((((0x88a31-279873)/0xc9)+-#"impulse 2022"))==3104 do o=(2780608)while _<=(0x7e-80)do o-= o o=(8072262)while _>(203-0x9e)do o-= o n[e[f]][n[e[t]]]=n[e[M]];break end while(o)/((((4331+-0x6d)-2131)+-#[[nico der hurensohn]]))==3894 do U[e[h]]=n[e[x]];break end;break;end while 1472==(o)/((-60+0x79d))do o=(5636511)while _<=((-96+0x98)+-#[[Niggabyte]])do o-= o n[e[O]]=e[k];break;end while 2547==(o)/((2294+-0x51))do o=(1290680)while _>(0xba0/(-#[[negus]]+(11658/0xae)))do o-= o if(n[e[O]]~=e[M])then l=l+r;else l=e[k];end;break end while(o)/((3402-0x6e2))==787 do local e={n,e};e[r][e[i][u]]=e[d][e[i][M]]+e[r][e[i][h]];break end;break;end break;end break;end break;end while 1836==(o)/((1820-0x3a0))do o=(521556)while _<=(0x2298/164)do o-= o o=(628672)while _<=(-#"Ur mom"+(((424/0x2)+-#[[i love minors]])-142))do o-= o o=(266742)while(-#[[impulse reel pastebin]]+(0x9e-87))<_ do o-= o n[e[b]]={};l=l+d;e=a[l];n[e[f]][e[w]]=e[P];l=l+d;e=a[l];n[e[f]]={};l=l+d;e=a[l];n[e[x]]={};l=l+d;e=a[l];n[e[s]][e[c]]=e[M];l=l+d;e=a[l];n[e[u]]=e[t];l=l+d;e=a[l];n[e[f]]=U[e[g]];l=l+d;e=a[l];n[e[f]]=n[e[t]][e[C]];l=l+d;e=a[l];n[e[u]]=n[e[g]][e[C]];l=l+d;e=a[l];n[e[u]]=n[e[t]][e[m]];break end while(o)/((-53+0x7e))==3654 do n[e[f]]=#n[e[k]];break end;break;end while(o)/((0x717b/139))==3008 do o=(5321896)while(126-0x4a)>=_ do o-= o n[e[O]]=#n[e[h]];break;end while 2473==(o)/(((296616/0x88)+-#'Obfuscated By Obamas Left Nut'))do o=(1884948)while _>(5035/0x5f)do o-= o if not n[e[u]]then l=l+r;else l=e[c];end;break end while(o)/(((3442-0x6d3)+-#[[0nly 1337]]))==1118 do n[e[x]]=n[e[w]][n[e[N]]];break end;break;end break;end break;end while(o)/((0x76d-1014))==588 do o=(3174748)while(-#[[monkey mode]]+(0xea-167))>=_ do o-= o o=(7630448)while(0x54+-29)<_ do o-= o local o=e[x];local _=n[o+2];local d=n[o]+_;n[o]=d;if(_>0)then if(d<=n[o+1])then l=e[k];n[o+3]=d;end elseif(d>=n[o+1])then l=e[h];n[o+3]=d;end break end while 2702==(o)/((0x40cf0/94))do local o=e[f]n[o]=n[o](v(n,o+d,e[g]))break end;break;end while 2258==(o)/((0x57304/254))do o=(7671750)while(0xbd-(-0x39+189))>=_ do o-= o n[e[s]]=z(B[e[g]],nil,U);break;end while(o)/((5351-0xa8d))==2895 do o=(928892)while _>(0x2dc4/202)do o-= o n[e[O]]=U[e[k]];break end while(o)/(((-73+0xa59)+-#[[send nudes]]))==362 do local l=e[k];local o=n[l]for e=l+1,e[P]do o=o..n[e];end;n[e[s]]=o;break end;break;end break;end break;end break;end break;end while(o)/((0x83196/186))==1703 do o=(3266392)while((0x107-178)+-#"warboy hates you")>=_ do o-= o o=(2614098)while(-0x17+87)>=_ do o-= o o=(9058200)while _<=(0x54+-23)do o-= o o=(4064598)while _>(-#'nico der hurensohn'+(0x115e/57))do o-= o U[e[c]]=n[e[x]];l=l+d;e=a[l];n[e[b]]={};l=l+d;e=a[l];n[e[x]]={};l=l+d;e=a[l];U[e[t]]=n[e[x]];l=l+d;e=a[l];n[e[O]]=U[e[k]];l=l+d;e=a[l];if(n[e[b]]~=e[P])then l=l+r;else l=e[c];end;break end while 2154==(o)/((3878-0x7c7))do n[e[O]]=n[e[k]]-n[e[N]];break end;break;end while(o)/((0xd6560/236))==2435 do o=(485904)while _<=(0x50+-18)do o-= o n[e[u]]=z(B[e[c]],nil,U);break;end while(o)/(((0x6eb0/161)+-#'anime is for fags'))==3056 do o=(573300)while(0xba-123)<_ do o-= o D[e[c]]=n[e[u]];break end while(o)/((-#[[how to join the kkk]]+(481-0x118)))==3150 do local o=e[b];local l=n[o];for e=o+1,e[g]do L(l,n[e])end;break end;break;end break;end break;end while 1389==(o)/((-119+0x7d1))do o=(3191350)while _<=(0xa9-103)do o-= o o=(2568496)while(235-0xaa)<_ do o-= o local o=e[x]n[o]=n[o](v(n,o+d,e[k]))break end while(o)/((-#'Big black men'+((-#'real roblox omg builderman caught playing real'+(0xe9b41/219))-0x888)))==1207 do n[e[x]]=D[e[t]];l=l+d;e=a[l];n[e[f]]=#n[e[w]];l=l+d;e=a[l];D[e[c]]=n[e[f]];l=l+d;e=a[l];n[e[u]]=D[e[g]];l=l+d;e=a[l];n[e[s]]=#n[e[t]];l=l+d;e=a[l];D[e[g]]=n[e[b]];l=l+d;e=a[l];do return end;break end;break;end while(o)/((1564+-0x1a))==2075 do o=(296334)while(0xc7-132)>=_ do o-= o n[e[f]]=(e[t]~=0);break;end while 1818==(o)/((269+(-0x17+-83)))do o=(1069385)while((-#[[mike litoris]]+(0x238e/41))-0x8e)<_ do o-= o local l=e[s];local o=n[e[t]];n[l+1]=o;n[l]=o[e[S]];break end while 1955==(o)/((0x4a2-639))do if(n[e[O]]~=n[e[S]])then l=l+r;else l=e[h];end;break end;break;end break;end break;end break;end while 1432==(o)/((2369+-0x58))do o=(4836688)while(0x2344/122)>=_ do o-= o o=(313686)while _<=(0xc2+-123)do o-= o o=(9831864)while _>(0x11c6/65)do o-= o l=e[h];break end while(o)/((-#"waste of sperm"+(-0x32+2786)))==3612 do do return end;break end;break;end while(o)/(((-#"keno 0347 is a nerdy fag"+(-21-0x4))+0x16b))==999 do o=(9898502)while(8856/0x7b)>=_ do o-= o local e=e[f]n[e]=n[e](n[e+r])break;end while 2833==(o)/((3614+(-#'0nly segc'+(-0x6810/240))))do o=(7249784)while _>(0xf6-(38579/0xdf))do o-= o if n[e[f]]then l=l+d;else l=e[h];end;break end while(o)/(((0x1460+-74)-2600))==2852 do n[e[x]]={};break end;break;end break;end break;end while 1616==(o)/((((-0x27+-52)+3089)+-#"Bwomp"))do o=(1738618)while(0x100-(9845/0x37))>=_ do o-= o o=(2704644)while((180+-0x61)+-#'Gay porn')>=_ do o-= o n[e[x]]=U[e[w]];break;end while(o)/(((0x1ed4-4001)+-#'MSC 793z487nhvcgsdfgsudfza9889jgvz56gz56z547684z5g54z948g56z74j56475jzg645z6456 oh wait'))==711 do o=(7350630)while _>((0xbf+-95)+-#[[get good use moonsec]])do o-= o n[e[f]]=n[e[c]][n[e[M]]];break end while 2059==(o)/(((7298-0xe7e)+-#[[free bobux no skem]]))do n[e[O]]=n[e[c]];break end;break;end break;end while 1099==(o)/((-#'nerd'+(0xca7-1653)))do o=(8131085)while _<=(14274/0xb7)do o-= o local o=e[b];local d=n[o]local _=n[o+2];if(_>0)then if(d>n[o+1])then l=e[h];else n[o+3]=d;end elseif(d<n[o+1])then l=e[t];else n[o+3]=d;end break;end while 2537==(o)/((0x82ac3/167))do o=(10170748)while(186+-0x6b)<_ do o-= o do return n[e[x]]end break end while(o)/((-#[[If no milk then return ffather]]+(3329+(-#[[Faggot]]+(-0x40+7)))))==3143 do n[e[b]]=(e[h]~=0);l=l+r;break end;break;end break;end break;end break;end break;end break;end l+= r end;end);end;return z(F(),{},A())()end)_msec({[(347-0xb8)]='\115\116'..(function(e)return(e and'(22100/0xdd)')or'\114\105'or'\120\58'end)(((0x66-81)+-#'cruz pp is large')==(0x2dc/122))..'\110g',[(797+-0x4f)]='\108\100'..(function(e)return(e and'(292-(-107+0x12b))')or'\101\120'or'\119\111'end)((91-0x56)==(0x1f-25))..'\112',[(18348/0x42)]=(function(e)return(e and'(0xaa+-70)')and'\98\121'or'\100\120'end)((88+-0x53)==((-0x66+135)+-#[[10 black dicks in your mouth]]))..'\116\101',[(0x318-438)]='\99'..(function(e)return(e and'(0x4e84/201)')and'\90\19\157'or'\104\97'end)((((1181+-0x30)+-#"Impulse youtube ez")/0xdf)==(48-0x2d))..'\114',[(-0x24+554)]='\116\97'..(function(e)return(e and'(22300/0xdf)')and'\64\113'or'\98\108'end)((-#'Crackzzzz'+(0xa5f/177))==(-#"if true then return your dad"+(-0x1d+62)))..'\101',[((23400/0x2d)+-#[[Me be like at 5am in the morning]])]=(function(e)return(e and'(0x10c-168)')or'\115\117'or'\78\107'end)((168/0x38)==(123-0x5c))..'\98',[(1807-0x3bf)]='\99\111'..(function(e)return(e and'(265-0xa5)')and'\110\99'or'\110\105\103\97'end)((0x73-84)==(-#[[dies of cringe]]+(0x9f+-114)))..'\97\116',[(-#[[FranzJPresents]]+(0x53b-715))]=(function(e,o)return(e and'(6400/0x40)')and'\48\159\158\188\10'or'\109\97'end)((525/0x69)==((0xe86/143)+-#[[Cock and ball tortue]]))..'\116\104',[(2835-0x5b4)]=(function(e,o)return(((922-0x205)/81)==(0x60-(0x4bed/209))and'\48'..'\195'or e..((not'\20\95\69'and'\90'..'\180'or o)))or'\199\203\95'end),[((0x7b6-1002)+-#'Bwomp')]='\105\110'..(function(e,o)return(e and'(0x2af8/110)')and'\90\115\138\115\15'or'\115\101'end)(((4624/0x88)+-#'Fucking losed 027728272728271')==((0xc7c+-96)/100))..'\114\116',[(-#'MSC 793z487nhvcgsdfgsudfza9889jgvz56gz56z547684z5g54z948g56z74j56475jzg645z6456 oh wait bitch'+(72044/0x3e))]='\117\110'..(function(e,o)return(e and'(-0x66+202)')or'\112\97'or'\20\38\154'end)(((-0x56+100)+-#'0nly segc')==(0x6e-79))..'\99\107',[(0x38595/207)]='\115\101'..(function(e)return(e and'(-#"lego hax"+(0x582c/209))')and'\110\112\99\104'or'\108\101'end)((-0x37+60)==(-#'cilertedcool'+(0x1988/152)))..'\99\116',[(12830/0xa)]='\116\111\110'..(function(e,o)return(e and'(0x2d50/116)')and'\117\109\98'or'\100\97\120\122'end)((95/0x13)==(-98+0x67))..'\101\114'},{[((117+-0x44)+-#"0nly 1337 smashed ur wap")]=((getfenv))},((getfenv))()) end)()
+  --Function to fix slider
+local sliderInProgress = false;
+local function slider(value, whichSlider)
+	if sliderInProgress then
+		return
+	end
+	sliderInProgress = true
+	task.wait(5)
+	if getgenv().settings[whichSlider] == value then
+		saveSettings()
+		sliderInProgress = false;
+		if whichSlider == "serverHopDelay" then
+			hopSet()
+		end
+	else
+		sliderInProgress = false;
+		return slider(getgenv().settings[whichSlider], whichSlider)
+	end
+end
+  
+  --Booth update function
+local function update()
+	local text
+	local current = Players.LocalPlayer.leaderstats.Raised.Value
+	local goal = current + tonumber(getgenv().settings.goalBox)
+	if goal == 420 or goal == 425 then
+		goal = goal + 10
+	end
+	if current == 420 or current == 425 then
+		current = current + 10
+	end
+	if goal > 999 then
+		if tonumber(getgenv().settings.goalBox) < 10 then
+			goal = string.format("%.2fk", (current + 10) / 10 ^ 3)
+		else
+			goal = string.format("%.2fk", (goal) / 10 ^ 3)
+		end
+	end
+	if current > 999 then
+		current = string.format("%.2fk", current / 10 ^ 3)
+	end
+	if getgenv().settings.textUpdateToggle and getgenv().settings.customBoothText then
+		text = string.gsub(getgenv().settings.customBoothText, "$C", current)
+		text = string.gsub (text, "$G", goal)
+		text = string.gsub(text, '$D', tostring(getgenv().settings.jumpsPerRobux))
+		boothText = tostring('<font color="' .. getgenv().settings.hexBox .. '">' .. text .. '</font>')
+		  --Updates the booth text
+		local myBooth = Players.LocalPlayer.PlayerGui.MapUIContainer.MapUI.BoothUI:FindFirstChild(tostring("BoothUI" .. unclaimed[1]))
+		if myBooth.Sign.TextLabel.Text ~= boothText then
+			if string.find(myBooth.Sign.TextLabel.Text, "# #") or string.find(myBooth.Sign.TextLabel.Text, "##") then
+				require(game:GetService("ReplicatedStorage").Remotes).Event("SetBoothText"):FireServer("your text here", "booth")
+				task.wait(3)
+			end
+			require(game:GetService('ReplicatedStorage').Remotes).Event("SetBoothText"):FireServer(boothText, "booth")
+			task.wait(3)
+		end
+	end
+	if getgenv().settings.signToggle and getgenv().settings.signUpdateToggle and getgenv().settings.signText and signPass then
+		local currentSign = game:GetService('Players').LocalPlayer.Character.DonateSign.TextSign.SurfaceGui.TextLabel.Text
+		text = string.gsub(getgenv().settings.signText, "$C", current)
+		text = string.gsub (text, "$G", goal)
+		signText = tostring('<font color="' .. getgenv().settings.signHexBox .. '">' .. text .. '</font>')
+		if currentSign ~= signText then
+			if string.find(currentSign, "# #") or string.find(currentSign, "##") then
+				require(game:GetService('ReplicatedStorage').Remotes).Event("SetBoothText"):FireServer("your text here", "sign")
+				task.wait(3)
+			end
+			require(game:GetService('ReplicatedStorage').Remotes).Event("SetBoothText"):FireServer(signText, "sign")
+		end
+	end
+end
+local function begging()
+	while getgenv().settings.autoBeg do
+		game:GetService('ReplicatedStorage').DefaultChatSystemChatEvents.SayMessageRequest:FireServer(getgenv().settings.begMessage[math.random(#getgenv().settings.begMessage)], "All")
+		task.wait(getgenv().settings.begDelay)
+	end
+end
+
+local function webhook(raised,donor)
+	if getgenv().settings.webhookBox:gsub(' ', '') == '' then
+		return
+	end
+	local isLucky
+	local math1 = math.random(1,1000)
+	local math2 = math.random(1,1000)
+	if math1 == math2 then
+		isLucky = 'Lucky'
+	else
+		isLucky = 'Unlucky'
+	end
+	local a = os.time()
+	local a = os.date("!*t", a)
+	local c = game:GetService("MarketplaceService")
+	local c = c:GetProductInfo(game.PlaceId, Enum.InfoType.Asset)
+	local a = {
+		["title"] = '**' .. game:GetService('Players').LocalPlayer.Name .. '**',
+		["description"] = "",
+		["type"] = "rich",
+		["color"] = tonumber(getgenv().embedcolor),
+		["thumbnail"] = {
+			["url"] = "https://www.roblox.com/headshot-thumbnail/image?userId=" ..
+               Players.LocalPlayer.UserId .. "&width=420&height=420&format=png"
+		},
+		["image"] = {
+			["url"] = "http://www.roblox.com/Thumbs/Asset.ashx?Width=768&Height=432&AssetID=" .. game.PlaceId
+		},
+		["fields"] = {
+			{
+				["name"] = "Donation Amount",
+				["value"] = "`" .. tostring(raised) .. '`',
+				["inline"] = true
+			},
+			{
+				["name"] = "Total",
+				["value"] = '`' .. tostring(Players.LocalPlayer.leaderstats.Raised.Value) .. '`',
+				["inline"] = true
+			},
+			{
+				["name"] = "After Tax [DONATION]",
+				["value"] = '`' .. '' .. math.floor(tostring(raised * 0.6)) ..'`',
+				["inline"] = true
+			},
+			{
+				["name"] = "After Tax [TOTAL]",
+				["value"] = '`' .. math.floor(tostring(Players.LocalPlayer.leaderstats.Raised.Value * 0.6)) ..'`',
+				["inline"] = true
+			},
+			{
+				["name"] = "Donor",
+				["value"] = '`' .. tostring(donor) .. '`',
+				["inline"] = true
+			},
+			{
+				["name"] = "RNG lucky game:",
+				["value"] = '`' .. tostring(isLucky) .. '`',
+				["inline"] = true
+			},
+		},
+		["footer"] = {
+			["text"] = "made by SmokeyDeveloper",
+		},
+		["timestamp"] = string.format("%d-%d-%dT%02d:%02d:%02dZ", a.year, a.month, a.day, a.hour, a.min, a.sec)
+	}
+	httprequest{
+		Url = getgenv().settings.webhookBox,
+		Method = "POST",
+		Headers = {
+			["Content-Type"] = "application/json"
+		},
+		Body = game:GetService "HttpService":JSONEncode({
+			content = Content,
+			embeds = {
+				a
+			}
+		})
+	}   
+end
+
+  --GUI
+local Window = library:AddWindow("Smokey",
+  {
+	main_color = Color3.fromRGB(80, 80, 80),
+	min_size = Vector2.new(450, 483),
+	toggle_key = Enum.KeyCode.RightShift,
+})
+local boothTab = Window:AddTab("Booth")
+local signTab = Window:AddTab("Sign")
+local chatTab = Window:AddTab("Chat")
+local webhookTab = Window:AddTab("Webhook")
+local serverHopTab = Window:AddTab("Server")
+local otherTab = Window:AddTab("Other")
+local bThemes = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("ScreenGui"):WaitForChild("BoothSettings"):WaitForChild("ScrollingFrame"):WaitForChild("ChangeTheme"):WaitForChild("Themes")
+  
+  --Booth Settings
+local textUpdateToggle = boothTab:AddSwitch("Text Update", function(bool)
+	if settingsLock then
+		return
+	end
+	getgenv().settings.textUpdateToggle = bool
+	saveSettings()
+	if bool then
+		update()
+	end
+end)
+textUpdateToggle:Set(getgenv().settings.textUpdateToggle)
+local textUpdateDelay = boothTab:AddSlider("Text Update Delay (S)", function(x)
+	if settingsLock then
+		return
+	end
+	getgenv().settings.textUpdateDelay = x
+	coroutine.wrap(slider)(getgenv().settings.textUpdateDelay, "textUpdateDelay")
+end,
+  {
+	["min"] = 0,
+	["max"] = 120
+})
+textUpdateDelay:Set((getgenv().settings.textUpdateDelay / 120) * 100)
+boothTab:AddLabel("Text Color:")
+local hexBox = boothTab:AddTextBox("Hex Codes Only", function(text)
+	if settingsLock then
+		return
+	end
+	local success = pcall(function()
+		return Color3.fromHex(text)
+	end)
+	if success and string.find(text, "#") then
+		getgenv().settings.hexBox = text
+		saveSettings()
+		update()
+	end
+end,
+  {
+	["clear"] = false
+})
+hexBox.Text = getgenv().settings.hexBox
+boothTab:AddLabel("Goal Increase:")
+local goalBox = boothTab:AddTextBox("Numbers Only", function(text)
+	if tonumber(text) then
+		getgenv().settings.goalBox = tonumber(text)
+		saveSettings()
+		update()
+	end
+end,
+  {
+	["clear"] = false
+})
+goalBox.Text = getgenv().settings.goalBox
+boothTab:AddLabel("Custom Booth Text:")
+local customBoothText = boothTab:AddConsole({
+	["y"] = 50,
+	["source"] = "",
+})
+boothTab:AddLabel("Standing Position:")
+local standingPos = boothTab:AddDropdown("[ " .. getgenv().settings.standingPosition .. " ]", function(t)
+	getgenv().settings.standingPosition = t
+	saveSettings()
+	if t == "Front" then
+		getgenv().settings.boothPosition = 3
+	elseif t == "Left" then
+		getgenv().settings.boothPosition = -6
+	elseif t == "Right" then
+		getgenv().settings.boothPosition = 6
+	else
+		getgenv().settings.boothPosition = -5.5
+	end
+end)
+standingPos:Add('Front')
+standingPos:Add('Left')
+standingPos:Add('Right')
+standingPos:Add('Behind')
+customBoothText:Set(getgenv().settings.customBoothText)
+boothTab:AddButton("Save", function()
+	if #customBoothText:Get() > 221 then
+		return customBoothText:Set("221 Character Limit")
+	end
+	if settingsLock then
+		return
+	end
+	if customBoothText:Get() then
+		getgenv().settings.customBoothText = customBoothText:Get()
+		saveSettings()
+		update()
+	end
+end)
+local helpLabel = boothTab:AddLabel("$C = Current, $G = Goal, $D = Robux per jump, 221 Character Limit")
+helpLabel.TextSize = 9
+  --Sign Settings
+pcall(function()
+	if game:GetService("MarketplaceService"):UserOwnsGamePassAsync(Players.LocalPlayer.UserId, 28460459) then
+		signPass = true
+	end
+end)
+if signPass then
+	local signToggle = signTab:AddSwitch("Equip Sign", function(bool)
+		getgenv().settings.signToggle = bool
+		saveSettings()
+		if bool then
+			Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):EquipTool(Players.LocalPlayer.Backpack:FindFirstChild("DonateSign"))
+		else
+			Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):UnequipTools(Players.LocalPlayer.Character:FindFirstChild("DonateSign"))
+		end
+	end)
+	signToggle:Set(getgenv().settings.signToggle)
+	local signUpdateToggle = signTab:AddSwitch("Text Update", function(bool)
+		if settingsLock then
+			return
+		end
+		getgenv().settings.signUpdateToggle = bool
+		saveSettings()
+		if bool then
+			update()
+		end
+	end)
+	signUpdateToggle:Set(getgenv().settings.signUpdateToggle)
+	signTab:AddLabel("Text Color:")
+	local signHexBox = signTab:AddTextBox("Hex Codes Only", function(text)
+		if settingsLock then
+			return
+		end
+		local success = pcall(function()
+			return Color3.fromHex(text)
+		end)
+		if success and string.find(text, "#") then
+			getgenv().settings.signHexBox = text
+			saveSettings()
+			if getgenv().settings.signUpdateToggle and getgenv().settings.signText then
+				update()
+			end
+		end
+	end,
+	  {
+		["clear"] = false
+	})
+	signHexBox.Text = getgenv().settings.signHexBox
+	signTab:AddLabel("Sign Text:")
+	local signText = signTab:AddConsole({
+		["y"] = 50,
+		["source"] = "",
+	})
+	signText:Set(getgenv().settings.signText)
+	signTab:AddButton("Save", function()
+		if #signText:Get() > 221 then
+			return signText:Set("221 Character Limit")
+		end
+		if settingsLock then
+			return
+		end
+		if signText:Get() then
+			getgenv().settings.signText = signText:Get()
+			saveSettings()
+			update()
+		end
+	end)
+	local signHelpLabel = signTab:AddLabel("$C = Current, $G = Goal, 221 Character Limit")
+	signHelpLabel.TextSize = 9
+	signHelpLabel.TextXAlignment = Enum.TextXAlignment.Center
+else
+	signTab:AddLabel('Requires Sign Gamepass')
+end
+  
+  --Chat Settings
+local autoThanks = chatTab:AddSwitch("Auto Thank You", function(bool)
+	getgenv().settings.autoThanks = bool
+	saveSettings()
+end)
+autoThanks:Set(getgenv().settings.autoThanks)
+local autoBeg = chatTab:AddSwitch("Auto Beg", function(bool)
+	if settingsLock then
+		return
+	end
+	getgenv().settings.autoBeg = bool
+	saveSettings()
+	if bool then
+		spamming = task.spawn(begging)
+	else
+		task.cancel(spamming)
+	end
+end)
+autoBeg:Set(getgenv().settings.autoBeg)
+local thanksDelay = chatTab:AddSlider("Thanks Delay (S)", function(x)
+	if settingsLock then
+		return
+	end
+	getgenv().settings.thanksDelay = x
+	coroutine.wrap(slider)(getgenv().settings.thanksDelay, "thanksDelay")
+end,
+  {
+	["min"] = 1,
+	["max"] = 120
+})
+thanksDelay:Set((getgenv().settings.thanksDelay / 120) * 100)
+local begDelay = chatTab:AddSlider("Begging Delay (S)", function(x)
+	if settingsLock then
+		return
+	end
+	getgenv().settings.begDelay = x
+	coroutine.wrap(slider)(getgenv().settings.begDelay, "begDelay")
+end,
+  {
+	["min"] = 1,
+	["max"] = 300
+})
+begDelay:Set((getgenv().settings.begDelay / 300) * 100)
+local tym = chatTab:AddFolder("Thank You Messages:")
+local thanksMessage = tym:AddConsole({
+	["y"] = 170,
+	["source"] = "",
+})
+local full = ''
+for i, v in ipairs(getgenv().settings.thanksMessage) do
+	full = full .. v .. "\n"
+end
+thanksMessage:Set(full)
+tym:AddButton("Save", function()
+	local split = {}
+	for newline in string.gmatch(thanksMessage:Get(), "[^\n]+") do
+		table.insert(split, newline)
+	end
+	getgenv().settings.thanksMessage = split
+	saveSettings()
+end)
+local bm = chatTab:AddFolder("Begging Messages:")
+local begMessage = bm:AddConsole({
+	["y"] = 170,
+	["source"] = "",
+})
+local bfull = ''
+for i, v in ipairs(getgenv().settings.begMessage) do
+	bfull = bfull .. v .. "\n"
+end
+begMessage:Set(bfull)
+bm:AddButton("Save", function()
+	local bsplit = {}
+	for newline in string.gmatch(begMessage:Get(), "[^\n]+") do
+		table.insert(bsplit, newline)
+	end
+	getgenv().settings.begMessage = bsplit
+	saveSettings()
+end)
+  
+  
+  --Webhook Settings
+local webhookToggle = webhookTab:AddSwitch("Discord Webhook Notifications", function(bool)
+	getgenv().settings.webhookToggle = bool
+	saveSettings()
+end)
+webhookToggle:Set(getgenv().settings.webhookToggle)
+
+local serverHopDonation = webhookTab:AddSwitch("Notification after serverhop", function(bool)
+	getgenv().settings.webhookAfterSH = bool
+	saveSettings()
+end)
+
+serverHopDonation:Set(getgenv().settings.webhookAfterSH)
+
+local webhookBox = webhookTab:AddTextBox("Webhook URL", function(text)
+	if string.find(text, "api/") then
+		getgenv().settings.webhookBox = text;
+		saveSettings()
+	end
+end,
+  {
+	["clear"] = false
+})
+webhookBox.Text = getgenv().settings.webhookBox
+webhookTab:AddLabel('Press Enter to Save')
+webhookTab:AddButton("Test", function()
+	if getgenv().settings.webhookBox then
+		oldWebhook("webhook works | dotgg")
+	end
+end)
+
+webhookTab:AddLabel('Webhook Type: ')
+
+local webhookType = webhookTab:AddDropdown("[ " .. getgenv().settings.webhookType .. " ]", function(t)
+	if t == 'New [BUGGY]' then
+		getgenv().settings.webhookType = 'New'
+	else
+		getgenv().settings.webhookType = 'Old'
+	end
+	saveSettings()
+end)
+  
+webhookType:Add('New [BUGGY]')
+webhookType:Add('Old [RECOMMENDED!]')
+  
+  --Server Hop Settings
+pcall(function()
+	if game:GetService("VoiceChatService"):IsVoiceEnabledForUserIdAsync(Players.LocalPlayer.UserId) then
+		vcEnabled = true
+	end
+end)
+local serverHopToggle = serverHopTab:AddSwitch("Auto Server Hop", function(bool)
+	if settingsLock then
+		return
+	end
+	getgenv().settings.serverHopToggle = bool
+	hopSet()
+	saveSettings()
+end)
+
+serverHopToggle:Set(getgenv().settings.serverHopToggle)
+
+if vcEnabled then
+	local vcToggle = serverHopTab:AddSwitch("Voice Chat Servers", function(bool)
+		if settingsLock then
+			return
+		end
+		getgenv().settings.vcServer = bool
+		saveSettings()
+	end)
+	vcToggle:Set(getgenv().settings.vcServer)
+end
+local alhop = serverHopTab:AddSwitch("Random Hop", function(bool)
+	getgenv().settings.AlternativeHop = bool
+	saveSettings()
+end)
+
+local sHopSwitch = serverHopTab:AddSwitch('ServerHop after donation', function(bool)
+	getgenv().settings.serverHopAfterDonation = bool
+	saveSettings()
+end)
+
+sHopSwitch:Set(getgenv().settings.serverHopAfterDonation)
+
+local staffHopSwitch = serverHopTab:AddSwitch('ServerHop if Staff', function(bool)
+	getgenv().settings.staffHopA = bool
+	saveSettings()
+end)
+
+staffHopSwitch:Set(getgenv().settings.staffHopA)
+
+alhop:Set(getgenv().settings.AlternativeHop)
+serverHopTab:AddButton("Server Hop", function()
+	serverHop()
+end)
+
+local serverHopMinAmount = serverHopTab:AddTextBox("Minimum donated amount", function(text)
+	getgenv().settings.minimumDonated = tonumber(text) or 0
+end,
+  {
+	["clear"] = false
+})
+
+local serverHopDelay = serverHopTab:AddSlider("Server Hop Delay (M)", function(x)
+	if settingsLock then
+		return
+	end
+	getgenv().settings.serverHopDelay = x
+	coroutine.wrap(slider)(getgenv().settings.serverHopDelay, "serverHopDelay")
+end,
+  {
+	["min"] = 1,
+	["max"] = 120
+})
+
+serverHopTab:AddLabel("Server hop timer resets after donation")
+
+serverHopDelay:Set((getgenv().settings.serverHopDelay / 120) * 100)
+  --Other tab
+otherTab:AddLabel('Dance:')
+local danceDropdown = otherTab:AddDropdown("[ " .. getgenv().settings.danceChoice .. " ]", function(object)
+	if settingsLock then
+		return
+	end
+	getgenv().settings.danceChoice = object
+	saveSettings()
+	if object == "Disabled" then
+		Players:Chat("/e wave")
+	elseif object == "1" then
+		Players:Chat("/e dance")
+	else
+		Players:Chat("/e dance" .. object)
+	end
+end)
+
+danceDropdown:Add("Disabled")
+danceDropdown:Add("1")
+danceDropdown:Add("2")
+danceDropdown:Add("3")
+local render = otherTab:AddSwitch("Disable Rendering", function(bool)
+	getgenv().settings.render = bool
+	saveSettings()
+	if bool then
+		game:GetService("RunService"):Set3dRenderingEnabled(false)
+	else
+		game:GetService("RunService"):Set3dRenderingEnabled(true)
+	end
+end)
+local jumpswitch = otherTab:AddSwitch("Donation Jump", function(bool)
+	getgenv().settings.donationJump = bool
+	saveSettings()
+end)
+jumpswitch:Set(getgenv().settings.donationJump)
+local autoReply = otherTab:AddSwitch("Auto Reply [Experimental]", function(bool)
+	getgenv().settings.autoNearReply = bool
+	saveSettings()
+end)
+autoReply:Set(getgenv().settings.autoNearReply)
+local anMode = otherTab:AddSwitch('Anonymous Mode', function(bool)
+	getgenv().settings.AnonymousMode = bool
+	if getgenv().settings.AnonymousMode then
+		require(game:GetService('ReplicatedStorage').Remotes).Event('SetDonatedVisibility'):FireServer(false)
+	else
+		require(game:GetService('ReplicatedStorage').Remotes).Event('SetDonatedVisibility'):FireServer(true)
+	end
+	saveSettings()
+end)
+anMode:Set(getgenv().settings.AnonymousMode)
+
+if getgenv().settings.AnonymousMode then
+	require(game:GetService('ReplicatedStorage').Remotes).Event('SetDonatedVisibility'):FireServer(false)
+end
+
+task.spawn(function()
+	while task.wait(1) do
+		for i, v in next, Players:GetPlayers() do
+			playerChecker(v)
+			task.wait()
+		end
+	end
+end)
+
+local spinToggle = otherTab:AddSwitch('Spin [1R$ = +1 speed]', function(bool)
+	getgenv().settings.spinSet = bool
+	if getgenv().settings.spinSet then
+		local root = Players.LocalPlayer.Character.Humanoid.RootPart
+		local Spin = Instance.new("BodyAngularVelocity")
+		if syn then syn.protect_gui(Spin) end
+		Spin.Name = "Spin"
+		Spin.Parent = root
+		Spin.MaxTorque = Vector3.new(0, math.huge, 0)
+		Spin.AngularVelocity = Vector3.new(0, 0.25 * settings.spinSpeedMultiplier, 0)
+	elseif not getgenv().settings.spinSet and Players.LocalPlayer.Character.Humanoid.RootPart:FindFirstChild('Spin') then
+		Players.LocalPlayer.Character.Humanoid.RootPart.Spin:Destroy()
+	end
+	saveSettings()
+end)
 
 
+local fpsBoosts = otherTab:AddSwitch('CPU Saver',function(bool)
+	getgenv().settings.fpsBoost = bool
+	saveSettings()
+	task.spawn(function()
+	task.wait(9)
+	if getgenv().settings.fpsBoost then
+		for i, v in next, workspace:GetDescendants() do
+			task.wait()
+			if v:IsA('BasePart') then
+				v.Material = Enum.Material.Plastic
+				v.CastShadow = false
+			end
+			if v:IsA('Decal') or (string.match(v.ClassName, 'Mesh') and not v:IsDescendantOf(game:GetService('Players').LocalPlayer.Character)) then
+				v:Destroy()
+			end
+			if string.match(v.Name, 'Blimp') and not game:GetService('Players'):FindFirstChild(v.Name) then
+				v:Destroy()
+			end
+		end
+		workspace.DescendantAdded:Connect(function(v)
+		task.wait()
+		if v:IsA('BasePart') then
+			v.Material = Enum.Material.Plastic
+			v.CastShadow = false
+		end
+		if v:IsA('Decal') or (string.match(v.ClassName, 'Mesh') and not v:IsDescendantOf(game:GetService('Players').LocalPlayer.Character)) then
+			v:Destroy()
+		end
+		if string.match(v.Name, 'Blimp') and not game:GetService('Players'):FindFirstChild(v.Name) then
+			v:Destroy()
+		end
+		end)
+		
+		game:GetService('Lighting').GlobalShadows = false
+		for i,v in next, game:GetService("Lighting"):GetChildren() do
+			v:Destroy()
+		end
+		if settings then settings().Rendering.QualityLevel = 1 end
+	end end)
+end)
+
+fpsBoosts:Set(getgenv().settings.fpsBoost)
+
+local jumpsPerRB = otherTab:AddSlider("Jumps per robux", function(x)
+	if settingsLock then
+		return
+	end
+	getgenv().settings.jumpsPerRobux = x
+	saveSettings()
+	coroutine.wrap(slider)(getgenv().settings.jumpsPerRobux, "jumpsPerRobux")
+end,
+  {
+	["min"] = 0,
+	["max"] = 100
+})
+
+local spinMultiplier = otherTab:AddSlider("Spin speed multiplier", function(x)
+	if settingsLock then
+		return
+	end
+	getgenv().settings.spinSpeedMultiplier = x
+	saveSettings()
+	coroutine.wrap(slider)(getgenv().settings.spinSpeedMultiplier, "spinSpeedMultiplier")
+end,
+  {
+	["min"] = 1,
+	["max"] = 3
+})
+
+spinMultiplier:Set(getgenv().settings.spinSpeedMultiplier)
+jumpsPerRB:Set(getgenv().settings.jumpsPerRobux)
+spinToggle:Set(getgenv().settings.spinSet)
+
+if setfpscap and type(setfpscap) == "function" then
+	local fpsLimit = otherTab:AddSlider("FPS Limit", function(x)
+		if settingsLock then
+			return
+		end
+		getgenv().settings.fpsLimit = x
+		setfpscap(x)
+		coroutine.wrap(slider)(getgenv().settings.fpsLimit, "fpsLimit")
+	end,
+	  {
+		["min"] = 1,
+		["max"] = 60
+	})
+	fpsLimit:Set((getgenv().settings.fpsLimit / 60) * 100)
+	setfpscap(getgenv().settings.fpsLimit)
+end
+
+render:Set(getgenv().settings.render)
+
+boothTab:Show()
+library:FormatWindows()
+settingsLock = false
+  
+  --Finds unclaimed booths
+local function findUnclaimed()
+	for i, v in pairs(Players.LocalPlayer.PlayerGui:WaitForChild('MapUIContainer'):WaitForChild('MapUI'):WaitForChild('BoothUI'):GetChildren()) do
+		if (v.Details.Owner.Text == "unclaimed") then
+			table.insert(unclaimed, tonumber(string.match(tostring(v), "%d+")))
+		end
+	end
+end
+if not pcall(findUnclaimed) then
+	serverHop()
+end
+local claimCount = #unclaimed
+  --Claim booth function
+local function boothclaim()
+	require(game:GetService('ReplicatedStorage').Remotes).Event("ClaimBooth"):InvokeServer(unclaimed[1])
+	if not string.find(Players.LocalPlayer.PlayerGui.MapUIContainer.MapUI.BoothUI:FindFirstChild(tostring("BoothUI" .. unclaimed[1])).Details.Owner.Text, Players.LocalPlayer.DisplayName) then
+		task.wait(1)
+		if not string.find(Players.LocalPlayer.PlayerGui.MapUIContainer.MapUI.BoothUI:FindFirstChild(tostring("BoothUI" .. unclaimed[1])).Details.Owner.Text, Players.LocalPlayer.DisplayName) then
+			error()
+		end
+	end
+end
+  --Checks if booth claim fails
+while not pcall(boothclaim) do
+	if errCount >= claimCount then
+		serverHop()
+	end
+	table.remove(unclaimed, 1)
+	errCount = errCount + 1
+end
+hopSet()
+local function walkToBooth()
+	local theCframe
+	if string.find(tostring(getgenv().settings.boothPosition), "6") then
+		theCframe = CFrame.new(getgenv().settings.boothPosition, 0, 0)
+	else
+		theCframe = CFrame.new(0, 0, getgenv().settings.boothPosition)
+	end
+	local boothPos, mainPosX
+	for i, v in ipairs(game:GetService("Workspace").BoothInteractions:GetChildren()) do
+		if v:GetAttribute("BoothSlot") == unclaimed[1] then
+			mainPosX = v.CFrame
+			boothPos = v.CFrame * theCframe
+			break
+		end
+	end
+	game:GetService('VirtualInputManager'):SendKeyEvent(true, "LeftControl", false, game)
+	local Controls = require(Players.LocalPlayer.PlayerScripts:WaitForChild("PlayerModule")):GetControls()
+	Controls:Disable()
+	local atBooth = false
+	game:GetService("Workspace").Map.Main.Bench:Destroy()
+	Players.LocalPlayer.Character.Humanoid:MoveTo(boothPos.Position)
+	Players.LocalPlayer.Character.Humanoid.MoveToFinished:Connect(function(reached)
+		atBooth = true
+	end)
+	repeat
+		task.wait()
+	until atBooth
+	Players.LocalPlayer.Character.Humanoid.RootPart.CFrame = CFrame.new(boothPos.Position)
+	Controls:Enable()
+	game:GetService('VirtualInputManager'):SendKeyEvent(false, "LeftControl", false, game)
+	Players.LocalPlayer.Character:SetPrimaryPartCFrame(CFrame.new(Players.LocalPlayer.Character.HumanoidRootPart.Position, Vector3.new(40, 14, 101)))
+	task.wait(0.6)
+	Players:Chat('/e dance' .. getgenv().settings.danceChoice)
+end
+walkToBooth()
+if getgenv().settings.autoBeg then
+	spamming = task.spawn(begging)
+end
+local RaisedC = Players.LocalPlayer.leaderstats.Raised.value
+Players.LocalPlayer.leaderstats.Raised.Changed:Connect(function()
+	local playerWhoDonated
+	hopSet()
+	if Players.LocalPlayer.Character:FindFirstChildWhichIsA('Humanoid').RootPart:FindFirstChild('Spin') then
+		xspin = (((xspin + Players.LocalPlayer.leaderstats.Raised.Value - RaisedC) / 3) * getgenv().settings.spinSpeedMultiplier) + Players.LocalPlayer.Character:FindFirstChildWhichIsA('Humanoid').RootPart:FindFirstChild('Spin').AngularVelocity.Y
+	end
+	if getgenv().settings.webhookToggle == true and getgenv().settings.webhookBox then
+		local LogService = Game:GetService("LogService")
+		local logs = LogService:GetLogHistory()
+		if string.find(logs[#logs].message, Players.LocalPlayer.DisplayName) then
+			local msg = string.gsub(logs[#logs].message, ' tipped ', ''):gsub('', ''):gsub('💸', ''):gsub(' to ', ''):gsub(Players.LocalPlayer.DisplayName, ''):gsub(tostring(Players.LocalPlayer.leaderstats.Raised.Value - RaisedC), ''):gsub('',''):gsub("💰",''):gsub(' ', '')
+			for i, v in next, Players:GetPlayers() do
+				if v.DisplayName == msg then
+					playerWhoDonated = v
+				end
+			end
+		end
+		if playerWhoDonated then
+			if getgenv().settings.webhookType == 'New' then
+			    webhook(Players.LocalPlayer.leaderstats.Raised.Value - RaisedC,playerWhoDonated)
+			else
+			    oldWebhook(Players.LocalPlayer.Name .. ' | Donation amount: ' .. tostring(Players.LocalPlayer.leaderstats.Raised.Value - RaisedC) .. ' | [A/T]: ' .. tostring(math.floor((Players.LocalPlayer.leaderstats.Raised.Value - RaisedC) * 0.6)) .. ' | Total: ' .. tostring(Players.LocalPlayer.leaderstats.Raised.Value))
+			end
+		else
+			if getgenv().settings.webhookType == 'New' then
+				webhook(Players.LocalPlayer.leaderstats.Raised.Value - RaisedC)				
+			else
+			    oldWebhook(Players.LocalPlayer.Name .. ' | Donation amount: ' .. tostring(Players.LocalPlayer.leaderstats.Raised.Value - RaisedC) .. ' | [A/T]: ' .. tostring(math.floor((Players.LocalPlayer.leaderstats.Raised.Value - RaisedC) * 0.6)) .. ' | Total: ' .. tostring(Players.LocalPlayer.leaderstats.Raised.Value))
+			end
+		end
+	end
+	if getgenv().settings.serverHopAfterDonation == true then
+		task.spawn(function()
+			serverHop()
+		end)
+	end
+	if Players.LocalPlayer.Character.Humanoid.RootPart:FindFirstChild('Spin') and getgenv().settings.spinSet == true then
+		local spin = Players.LocalPlayer.Character.Humanoid.RootPart:FindFirstChild('Spin')
+		spin.AngularVelocity = Vector3.new(0, xspin, 0)
+	end
+	if getgenv().settings.donationJump == true and not getgenv().settings.spinSet == true then
+		task.spawn(function()
+			if getgenv().settings.jumpsPerRobux == 1 then
+				for i = 1, game:GetService('Players').LocalPlayer.leaderstats.Raised.Value - RaisedC do
+					game:GetService('Players').LocalPlayer.Character.Humanoid:ChangeState('Jumping')
+					repeat
+						task.wait()
+					until game:GetService('Players').LocalPlayer.Character.Humanoid:GetState() == Enum.HumanoidStateType.Running
+				end
+			else
+				for i = 1, (game:GetService('Players').LocalPlayer.leaderstats.Raised.Value - RaisedC) * getgenv().settings.jumpsPerRobux do
+					game:GetService('Players').LocalPlayer.Character.Humanoid:ChangeState('Jumping')
+					repeat
+						task.wait()
+					until game:GetService('Players').LocalPlayer.Character.Humanoid:GetState() == Enum.HumanoidStateType.Running
+				end
+			end
+		end)
+	end
+	RaisedC = Players.LocalPlayer.leaderstats.Raised.value
+	if getgenv().settings.autoThanks == true then
+		task.spawn(function()
+			task.wait(getgenv().settings.thanksDelay)
+			game:GetService('ReplicatedStorage').DefaultChatSystemChatEvents.SayMessageRequest:FireServer(getgenv().settings.thanksMessage[math.random(#getgenv().settings.thanksMessage)], "All")
+		end)
+	end
+	task.wait(getgenv().settings.textUpdateDelay)
+	update()
+end)
+update()
+
+task.spawn(function()
+	raisedV = 0
+	task.wait(5)
+	Players.LocalPlayer.CharacterRemoving:Connect(function()
+		if getgenv().settings.spinSet then
+			serverHop()
+		end
+	end)
+	for i,v in next, Players:GetPlayers() do
+		if v:FindFirstChild('leaderstats') and v ~= Players.LocalPlayer then
+			if raisedV ~= nil then
+				if v.leaderstats.Raised.Value > raisedV then
+					raisedV = v.leaderstats.Raised.Value
+				end
+			else
+				raisedV = v.leaderstats.Raised.Value
+			end
+		end
+	end
+	if raisedV < getgenv().settings.minimumDonated then
+		serverHop()
+	end
+end)
+
+task.spawn(function()
+	while task.wait(5) do
+		saveSettings()
+		if (Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid').RootPart) then
+			local root = Players.LocalPlayer.Character:FindFirstChildOfClass('Humanoid').RootPart
+			if (root.Position - positionX.Position).Magnitude > 1500 or (root.Position - positionX.Position).Magnitude < -1500 then
+				serverHop()
+			end
+		end
+	end
+end)
+
+if getgenv().settings.webhookAfterSH then
+	webhook('hi hello ' .. Players.LocalPlayer.DisplayName .. ' (' .. Players.LocalPlayer.Name .. ') serverhopped')
+end
+
+local msgdone = game:GetService('ReplicatedStorage').DefaultChatSystemChatEvents.OnMessageDoneFiltering
+local randommsgs = {
+	'yes',
+	'ok',
+	'alr',
+	'yeah'
+}
+local randombotmsgs = {
+	'no im not a bot',
+	'why do yall think im a bot :(',
+	'bro im not a bot',
+	'bruh shut up im a real human'
+}
+local messageRequest = game:GetService('ReplicatedStorage').DefaultChatSystemChatEvents.SayMessageRequest
+msgdone.OnClientEvent:Connect(function(msgdata)
+	local speaker = tostring(msgdata.FromSpeaker)
+	local message = string.lower(msgdata.Message)
+	task.wait(2.1 + math.random(0.4,1))
+	local plrChatted = game:GetService('Players')[speaker] or nil
+	if (plrChatted and plrChatted == game:GetService('Players').LocalPlayer) or getgenv().settings.autoNearReply == false or not plrChatted then
+		return
+	end
+	pcall(function()
+		local chatChar = plrChatted.Character
+		if (plrChatted.Character and plrChatted.Character.Humanoid.RootPart) then
+			local root = chatChar.Humanoid.RootPart
+			if (root.Position - game:GetService('Players').LocalPlayer.Character.Humanoid.RootPart.Position).Magnitude < 11 then
+				if message == 'hello' or message == 'hi' or message == 'sup' or message == 'hey' then
+					messageRequest:FireServer("hello", 'All')
+				elseif string.find(message, 'jump') then
+					messageRequest:FireServer('ok', 'All')
+				elseif string.find(message, '?') and not string.find(message,'bot') then
+					messageRequest:FireServer('yes', 'All')
+				elseif string.find(message,'bot') then
+					messageRequest:FireServer(randombotmsgs[math.random(1,#randombotmsgs)], 'All')
+				elseif string.find(message,'donate') then
+					messageRequest:FireServer('no','All')
+				elseif string.find(message,'scam') then
+					messageRequest:FireServer('no i dont scam','All')
+				else
+					messageRequest:FireServer(randommsgs[math.random(1, #randommsgs)], 'All')
+				end
+			end
+		end
+	end)
+end)
+if game:GetService("CoreGui").imgui.Windows.Window.Title.Text == "Loading..." then
+	game:GetService("CoreGui").imgui.Windows.Window.Title.Text = "Smokey On Top"
+end
+while task.wait(getgenv().settings.serverHopDelay * 60) do
+	if not hopTimer then
+		hopSet()
+	end
+end
